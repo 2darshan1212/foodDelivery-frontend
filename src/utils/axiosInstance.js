@@ -3,9 +3,13 @@ import axios from "axios";
 
 // Determine the backend URL based on environment
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Get correct backend URL - ensure this matches your actual backend URL on Vercel
 const backendUrl = isProduction
   ? "https://food-delivery-backend-gray.vercel.app/api/v1"
   : "http://localhost:3000/api/v1";
+  
+console.log('Using backend URL:', backendUrl);
 
 const instance = axios.create({
   baseURL: backendUrl,

@@ -23,14 +23,14 @@ const Login = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      console.log('Attempting login with credentials:', { email: input.email, passwordProvided: !!input.password });
       
-      // Use the correct URL based on environment (just like our axiosInstance)
-      const baseURL = process.env.NODE_ENV === 'production'
-        ? "https://food-delivery-backend-gray.vercel.app/api/v1"
-        : "http://localhost:3000/api/v1";
+      // Always use the absolute URL for login to avoid any path issues
+      const loginUrl = "https://food-delivery-backend-gray.vercel.app/api/v1/user/login";
+      console.log('Making login request to:', loginUrl);
       
       const res = await axios.post(
-        `${baseURL}/user/login`,
+        loginUrl,
         input,
         {
           headers: {
@@ -40,7 +40,16 @@ const Login = () => {
         }
       );
       
-      console.log('Login response:', res.data);
+      console.log('Login response received:', { 
+        success: res.data.success,
+        hasToken: !!res.data.token,
+        userData: !!res.data.user
+      });
+      
+      // Check for token in response
+      if (!res.data.token) {
+        console.error('No token received in login response!');
+      }
       
       if (res.data.success) {
         const userData = {
@@ -48,11 +57,15 @@ const Login = () => {
           isAdmin: res.data.user.isAdmin || false,
         };
         
-        // Store the token in localStorage for the Authorization header fallback
-        // This will be used by our axiosInstance when cookies fail
+        // Store the token in localStorage - we'll use ONLY this method for simplicity
         if (res.data.token) {
           localStorage.setItem('authToken', res.data.token);
           console.log('Auth token saved to localStorage for API requests');
+          
+          // Set the token on all subsequent axios requests
+          axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+        } else {
+          console.error('No token received from server, authentication will fail!');
         }
         
         dispatch(setAuthUser(userData));

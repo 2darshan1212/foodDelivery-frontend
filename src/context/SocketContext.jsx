@@ -17,15 +17,18 @@ export const SocketProvider = ({ children }) => {
     // Only connect if the user is authenticated
     if (isAuthenticated && token && user) {
       // Create socket connection
-      const newSocket = io("https://food-delivery-backend-gray.vercel.app/", {
-        auth: {
-          token,
-        },
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      });
+      const newSocket = io(
+        "https://food-delivery-backend-gray.vercel.app/api/",
+        {
+          auth: {
+            token,
+          },
+          transports: ["websocket"],
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+        }
+      );
 
       // Set up event handlers
       newSocket.on("connect", () => {

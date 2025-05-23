@@ -107,7 +107,7 @@ const GoogleMapEmbed = ({ lat1, lon1, lat2, lon2, height = 400 }) => {
 // API base URL from environment or default to localhost
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://food-delivery-backend-gray.vercel.app/";
+  "https://food-delivery-backend-gray.vercel.app/api/";
 
 /**
  * Calculate the distance between two points using the Haversine formula with enhanced accuracy
@@ -913,7 +913,7 @@ const PostCard = ({ post }) => {
 
       const action = liked ? "dislike" : "like";
       const res = await axios.get(
-        `https://food-delivery-backend-gray.vercel.app/api/v1/post/${post._id}/${action}`,
+        `https://food-delivery-backend-gray.vercel.app/api/api/v1/post/${post._id}/${action}`,
         { withCredentials: true }
       );
 
@@ -950,7 +950,7 @@ const PostCard = ({ post }) => {
 
     try {
       const res = await axios.post(
-        `https://food-delivery-backend-gray.vercel.app/api/v1/post/${post._id}/comment`,
+        `https://food-delivery-backend-gray.vercel.app/api/api/v1/post/${post._id}/comment`,
         { text: commentText },
         {
           headers: { "Content-Type": "application/json" },
@@ -977,7 +977,7 @@ const PostCard = ({ post }) => {
   const handleDeletePost = async () => {
     try {
       const res = await axios.delete(
-        `https://food-delivery-backend-gray.vercel.app/api/v1/post/delete/${post._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/api/v1/post/delete/${post._id}`,
         { withCredentials: true }
       );
 

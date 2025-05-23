@@ -32,7 +32,7 @@ const AdminCheck = () => {
 
       // Check /me endpoint
       const meResponse = await axios.get(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/user/me",
+        "https://food-delivery-backend-gray.vercel.app/api/api/v1/user/me",
         {
           withCredentials: true,
         }
@@ -40,7 +40,7 @@ const AdminCheck = () => {
 
       // Check admin status endpoint
       const adminCheckResponse = await axios.get(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/user/check-admin",
+        "https://food-delivery-backend-gray.vercel.app/api/api/v1/user/check-admin",
         {
           withCredentials: true,
         }

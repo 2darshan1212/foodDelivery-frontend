@@ -27,7 +27,7 @@ import { useStoryProtocol } from "../../providers/StoryProtocolProvider";
 // API base URL from environment or default to localhost
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://food-delivery-backend-gray.vercel.app/";
+  "https://food-delivery-backend-gray.vercel.app/api/";
 
 const CreatePost = ({ open, setOpen, refreshPosts }) => {
   const postRef = useRef();

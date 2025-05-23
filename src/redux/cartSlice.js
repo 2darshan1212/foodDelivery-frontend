@@ -5,7 +5,7 @@ import axios from "axios";
 import { createNewOrder, getUserOrders } from "../services/orderService";
 
 // API base URL from environment or default to localhost
-const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/";
+const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/api/";
 
 // Custom action to reset order status
 const resetOrderStatusAction = createAction("cart/resetOrderStatus");

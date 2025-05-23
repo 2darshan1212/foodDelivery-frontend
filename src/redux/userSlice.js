@@ -7,7 +7,7 @@ export const fetchCurrentUserFollowings = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/user/followings",
+        "https://food-delivery-backend-gray.vercel.app/api/api/v1/user/followings",
         {
           withCredentials: true,
         }
@@ -26,7 +26,7 @@ export const followOrUnfollow = createAsyncThunk(
   async (targetUserId, { rejectWithValue }) => {
     try {
       const res = await axios.post(
-        `https://food-delivery-backend-gray.vercel.app/api/v1/user/followorunfollow/${targetUserId}`,
+        `https://food-delivery-backend-gray.vercel.app/api/api/v1/user/followorunfollow/${targetUserId}`,
         {},
         { withCredentials: true }
       );
@@ -57,7 +57,7 @@ export const getUserStats = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `https://food-delivery-backend-gray.vercel.app/api/v1/user/stats/${userId}`,
+        `https://food-delivery-backend-gray.vercel.app/api/api/v1/user/stats/${userId}`,
         { withCredentials: true }
       );
       return res.data;

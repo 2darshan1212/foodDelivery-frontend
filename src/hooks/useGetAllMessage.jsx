@@ -16,7 +16,7 @@ const useGetAllMessage = () => {
 
       try {
         const res = await axios.get(
-          `https://food-delivery-backend-gray.vercel.app/api/v1/message/all/${selectedUser._id}`,
+          `https://food-delivery-backend-gray.vercel.appapi/v1/message/all/${selectedUser._id}`,
           {
             withCredentials: true,
           }

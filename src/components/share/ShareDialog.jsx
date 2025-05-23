@@ -136,7 +136,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
     try {
       setLoading(true);
       const res = await axios.get(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/user/suggested-users",
+        "https://food-delivery-backend-gray.vercel.appapi/v1/user/suggested-users",
         { withCredentials: true }
       );
 
@@ -190,7 +190,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
       setShareLoading(true);
 
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/share/create",
+        "https://food-delivery-backend-gray.vercel.appapi/v1/share/create",
         {
           postId: post._id,
           sharedWith: "specific",
@@ -238,7 +238,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
       setShareLoading(true);
 
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/share/create",
+        "https://food-delivery-backend-gray.vercel.appapi/v1/share/create",
         {
           postId: post._id,
           sharedWith: "followers",
@@ -287,7 +287,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
 
       // First create a share record
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/share/create",
+        "https://food-delivery-backend-gray.vercel.appapi/v1/share/create",
         {
           postId: post._id,
           sharedWith: "external",
@@ -369,7 +369,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
         // Record analytics for the share
         try {
           await axios.post(
-            "https://food-delivery-backend-gray.vercel.app/api/v1/analytics/record",
+            "https://food-delivery-backend-gray.vercel.appapi/v1/analytics/record",
             {
               type: "share",
               postId: post._id,
@@ -405,7 +405,7 @@ const ShareDialog = ({ open, onClose, post, onShareSuccess }) => {
     if (!shareLink) {
       try {
         const res = await axios.post(
-          "https://food-delivery-backend-gray.vercel.app/api/v1/share/create",
+          "https://food-delivery-backend-gray.vercel.appapi/v1/share/create",
           {
             postId: post._id,
             sharedWith: "public",

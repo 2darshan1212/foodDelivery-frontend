@@ -5,7 +5,7 @@ import axios from "axios";
 
 // Axios instance for direct API calls
 const api = axios.create({
-  baseURL: "https://food-delivery-backend-gray.vercel.app/",
+  baseURL: "https://food-delivery-backend-gray.vercel.app",
   withCredentials: true,
 });
 

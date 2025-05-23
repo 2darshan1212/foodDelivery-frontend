@@ -159,7 +159,7 @@ const FavoritesPage = () => {
         const bookmarksResponse = await axios.get(
           `${
             import.meta.env.VITE_API_URL ||
-            "https://food-delivery-backend-gray.vercel.app/"
+            "https://food-delivery-backend-gray.vercel.app"
           }/api/v1/post/bookmarked`,
           {
             withCredentials: true,
@@ -231,7 +231,7 @@ const FavoritesPage = () => {
         const response = await axios.get(
           `${
             import.meta.env.VITE_API_URL ||
-            "https://food-delivery-backend-gray.vercel.app/"
+            "https://food-delivery-backend-gray.vercel.app"
           }/api/v1/post/all`,
           {
             withCredentials: true,
@@ -342,7 +342,7 @@ const FavoritesPage = () => {
       const res = await axios.get(
         `${
           import.meta.env.VITE_API_URL ||
-          "https://food-delivery-backend-gray.vercel.app/"
+          "https://food-delivery-backend-gray.vercel.app"
         }/api/v1/post/${postId}/bookmark`,
         {
           withCredentials: true,

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/";
+const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app";
 
 // Create axios instance with credentials
 const api = axios.create({

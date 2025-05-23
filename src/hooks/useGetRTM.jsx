@@ -54,7 +54,7 @@ const useGetRTM = () => {
 
         // Call API to mark as read in the database
         fetch(
-          `https://food-delivery-backend-gray.vercel.app/api/v1/message/read/${newMessage.senderId}`,
+          `https://food-delivery-backend-gray.vercel.appapi/v1/message/read/${newMessage.senderId}`,
           {
             method: "PUT",
             credentials: "include",
@@ -86,7 +86,7 @@ const useGetRTM = () => {
 
     // Call API to mark messages from this user as read
     fetch(
-      `https://food-delivery-backend-gray.vercel.app/api/v1/message/read/${selectedUser._id}`,
+      `https://food-delivery-backend-gray.vercel.appapi/v1/message/read/${selectedUser._id}`,
       {
         method: "PUT",
         credentials: "include",

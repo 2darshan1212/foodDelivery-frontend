@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/";
+const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app";
 
 // Create axios instance with credentials and timeout
 const api = axios.create({

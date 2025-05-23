@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Input } from "@mui/material";
 import axios from "axios";
+import { setAuthToken } from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader, Loader2 } from "lucide-react";
@@ -57,13 +58,11 @@ const Login = () => {
           isAdmin: res.data.user.isAdmin || false,
         };
         
-        // Store the token in localStorage - we'll use ONLY this method for simplicity
+        // Use our centralized auth token management
         if (res.data.token) {
-          localStorage.setItem('authToken', res.data.token);
-          console.log('Auth token saved to localStorage for API requests');
-          
-          // Set the token on all subsequent axios requests
-          axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+          // This will handle storing in localStorage AND setting headers for all requests
+          setAuthToken(res.data.token);
+          console.log('Auth token set using centralized token management');
         } else {
           console.error('No token received from server, authentication will fail!');
         }

@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
     // Only connect if the user is authenticated
     if (isAuthenticated && token && user) {
       // Create socket connection
-      const newSocket = io("https://food-delivery-backend-gray.vercel.app", {
+      const newSocket = io("https://food-delivery-backend-gray.vercel.app/", {
         auth: {
           token,
         },

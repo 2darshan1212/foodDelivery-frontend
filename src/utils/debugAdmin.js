@@ -34,7 +34,7 @@ const debugAdmin = async () => {
     console.log("3. Checking /me endpoint...");
     try {
       const meResponse = await axios.get(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/user/me",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/me",
         {
           withCredentials: true,
         }
@@ -49,7 +49,7 @@ const debugAdmin = async () => {
     console.log("4. Checking admin status endpoint...");
     try {
       const adminCheckResponse = await axios.get(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/user/check-admin",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/check-admin",
         {
           withCredentials: true,
         }
@@ -63,7 +63,7 @@ const debugAdmin = async () => {
     console.log("5. Testing admin stats endpoint...");
     try {
       const statsResponse = await axios.get(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/orders/admin/stats",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/orders/admin/stats",
         {
           withCredentials: true,
         }

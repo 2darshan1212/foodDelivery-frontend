@@ -87,7 +87,7 @@ const UsersManagement = () => {
       }
 
       const response = await axios.get(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/user/admin/users?${params.toString()}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/user/admin/users?${params.toString()}`,
         {
           withCredentials: true,
         }
@@ -170,7 +170,7 @@ const UsersManagement = () => {
       setLoading(true);
 
       const response = await axios.put(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/user/admin/${selectedUser._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/user/admin/${selectedUser._id}`,
         {
           username: formData.username,
           email: formData.email,
@@ -215,7 +215,7 @@ const UsersManagement = () => {
       const endpoint = newAdminStatus ? "make-admin" : "remove-admin";
 
       const response = await axios.put(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/user/admin/${selectedUser._id}/${endpoint}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/user/admin/${selectedUser._id}/${endpoint}`,
         {},
         {
           withCredentials: true,
@@ -260,7 +260,7 @@ const UsersManagement = () => {
       const endpoint = newBlockStatus ? "block" : "unblock";
 
       const response = await axios.put(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/user/admin/${selectedUser._id}/${endpoint}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/user/admin/${selectedUser._id}/${endpoint}`,
         {},
         {
           withCredentials: true,

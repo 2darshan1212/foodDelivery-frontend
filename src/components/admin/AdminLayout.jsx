@@ -79,7 +79,7 @@ const AdminLayout = () => {
         // Double-check with backend if user is admin
         if (!user.isAdmin) {
           const userData = await axios.get(
-            "https://food-delivery-backend-gray.vercel.appapi/v1/user/me",
+            "https://food-delivery-backend-gray.vercel.app/api/v1/user/me",
             {
               withCredentials: true,
             }

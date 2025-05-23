@@ -10,7 +10,7 @@ const useGetSuggestedUser = () => {
     const fetchSuggestedUsers = async () => {
       try {
         const res = await axios.get(
-          "https://food-delivery-backend-gray.vercel.appapi/v1/user/suggested",
+          "https://food-delivery-backend-gray.vercel.app/api/v1/user/suggested",
           {
             withCredentials: true,
           }

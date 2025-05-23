@@ -34,7 +34,7 @@ const EditProfilePage = ({ userProfile }) => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/user/profile/edit",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/profile/edit",
         formData,
         {
           headers: {

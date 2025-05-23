@@ -60,7 +60,7 @@ const CategoriesManagement = () => {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/category/all",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/category/all",
         {
           withCredentials: true,
         }
@@ -140,7 +140,7 @@ const CategoriesManagement = () => {
       }
 
       await axios.post(
-        "https://food-delivery-backend-gray.vercel.appapi/v1/category/create",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/category/create",
         formDataObj,
         {
           withCredentials: true,
@@ -184,7 +184,7 @@ const CategoriesManagement = () => {
       }
 
       await axios.put(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/category/${selectedCategory._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/category/${selectedCategory._id}`,
         formDataObj,
         {
           withCredentials: true,
@@ -220,7 +220,7 @@ const CategoriesManagement = () => {
       setLoading(true);
 
       await axios.delete(
-        `https://food-delivery-backend-gray.vercel.appapi/v1/category/${selectedCategory._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/category/${selectedCategory._id}`,
         {
           withCredentials: true,
         }

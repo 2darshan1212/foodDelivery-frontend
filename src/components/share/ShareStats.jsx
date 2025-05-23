@@ -33,7 +33,7 @@ import {
 // API base URL from environment or default to localhost
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://food-delivery-backend-gray.vercel.app";
+  "https://food-delivery-backend-gray.vercel.app/";
 
 const ShareStats = ({ postId, onClose }) => {
   const [loading, setLoading] = useState(true);

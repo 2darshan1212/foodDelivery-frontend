@@ -24,7 +24,7 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app//api/v1/user/login",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/login",
         input,
         {
           headers: {

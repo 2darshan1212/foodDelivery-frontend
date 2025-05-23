@@ -22,7 +22,7 @@ const Signup = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app//api/v1/user/register",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/register",
         input,
         {
           headers: {

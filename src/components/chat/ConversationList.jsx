@@ -22,7 +22,7 @@ const ConversationList = ({ onSelectConversation }) => {
       try {
         setLoading(true);
         const res = await axios.get(
-          "https://food-delivery-backend-gray.vercel.app//api/v1/message/conversations",
+          "https://food-delivery-backend-gray.vercel.app/api/v1/message/conversations",
           { withCredentials: true }
         );
 
@@ -40,7 +40,7 @@ const ConversationList = ({ onSelectConversation }) => {
     const fetchAllUsers = async () => {
       try {
         const res = await axios.get(
-          "https://food-delivery-backend-gray.vercel.app//api/v1/user/all",
+          "https://food-delivery-backend-gray.vercel.app/api/v1/user/all",
           { withCredentials: true }
         );
 
@@ -85,7 +85,7 @@ const ConversationList = ({ onSelectConversation }) => {
 
       // Call the API to mark messages as read
       axios.put(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/message/read/${conversationData.participant._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/message/read/${conversationData.participant._id}`,
         {},
         { withCredentials: true }
       );

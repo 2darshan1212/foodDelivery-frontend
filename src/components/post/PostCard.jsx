@@ -913,7 +913,7 @@ const PostCard = ({ post }) => {
 
       const action = liked ? "dislike" : "like";
       const res = await axios.get(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/post/${post._id}/${action}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/post/${post._id}/${action}`,
         { withCredentials: true }
       );
 
@@ -950,7 +950,7 @@ const PostCard = ({ post }) => {
 
     try {
       const res = await axios.post(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/post/${post._id}/comment`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/post/${post._id}/comment`,
         { text: commentText },
         {
           headers: { "Content-Type": "application/json" },
@@ -977,7 +977,7 @@ const PostCard = ({ post }) => {
   const handleDeletePost = async () => {
     try {
       const res = await axios.delete(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/post/delete/${post._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/post/delete/${post._id}`,
         { withCredentials: true }
       );
 

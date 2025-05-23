@@ -7,7 +7,7 @@ export const fetchNotifications = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        "https://food-delivery-backend-gray.vercel.app//api/v1/notifications",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/notifications",
         { withCredentials: true }
       );
       return response.data.notifications;
@@ -25,7 +25,7 @@ export const markAllNotificationsRead = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
-        "https://food-delivery-backend-gray.vercel.app//api/v1/notifications/mark-all-read",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/notifications/mark-all-read",
         {},
         { withCredentials: true }
       );
@@ -44,7 +44,7 @@ export const markNotificationRead = createAsyncThunk(
   async (notificationId, { rejectWithValue }) => {
     try {
       const response = await axios.patch(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/notifications/mark-read/${notificationId}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/notifications/mark-read/${notificationId}`,
         {},
         { withCredentials: true }
       );

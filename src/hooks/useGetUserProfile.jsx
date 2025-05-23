@@ -19,7 +19,7 @@ const useGetUserProfile = (userId) => {
 
       try {
         const res = await axios.get(
-          `https://food-delivery-backend-gray.vercel.app//api/v1/user/${userId}/profile`,
+          `https://food-delivery-backend-gray.vercel.app/api/v1/user/${userId}/profile`,
           {
             withCredentials: true,
           }

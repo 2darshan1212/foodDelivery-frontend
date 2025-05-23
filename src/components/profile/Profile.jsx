@@ -63,7 +63,7 @@ const Profile = () => {
       console.log("Sending location update:", location);
 
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app//api/v1/user/location",
+        "https://food-delivery-backend-gray.vercel.app/api/v1/user/location",
         location,
         {
           headers: {
@@ -83,7 +83,7 @@ const Profile = () => {
         } else {
           // If user data not returned, fetch user data
           const userRes = await axios.get(
-            "https://food-delivery-backend-gray.vercel.app//api/v1/user/profile",
+            "https://food-delivery-backend-gray.vercel.app/api/v1/user/profile",
             {
               withCredentials: true,
             }
@@ -104,7 +104,7 @@ const Profile = () => {
   const findNearbyUsers = async () => {
     try {
       const res = await axios.get(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/user/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/user/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
         {
           withCredentials: true,
         }
@@ -122,7 +122,7 @@ const Profile = () => {
   const findNearbyPosts = async () => {
     try {
       const res = await axios.get(
-        `https://food-delivery-backend-gray.vercel.app//api/v1/post/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/post/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
         {
           withCredentials: true,
         }

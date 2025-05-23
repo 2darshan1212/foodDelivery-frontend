@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { setAuthUser } from "../../redux/authSlice";
- // update the path as per your project
+// update the path as per your project
 
 const EditProfilePage = ({ userProfile }) => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const EditProfilePage = ({ userProfile }) => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/profile/edit",
+        "https://food-delivery-backend-gray.vercel.app//api/v1/user/profile/edit",
         formData,
         {
           headers: {

@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-
 const Signup = () => {
   const [input, setInput] = useState({
     username: "",
@@ -13,43 +12,42 @@ const Signup = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
-  const signupHandler=async(e)=>{
+  const signupHandler = async (e) => {
     e.preventDefault();
-    try{
-      setLoading(true)
-        const res = await axios.post(
-          "http://localhost:8000/api/v1/user/register",
-          input,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log(res.data);
-        if(res.data.success){
-          navigate("/login")
-            toast.success(res.data.message)
-            setInput({
-              username:"",
-              email:"",
-              password:""
-            })
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "https://food-delivery-backend-gray.vercel.app//api/v1/user/register",
+        input,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
-    }catch(error){
-        console.log(error)
-        toast.error(error.response.data.message);
-    }finally{
+      );
+      console.log(res.data);
+      if (res.data.success) {
+        navigate("/login");
+        toast.success(res.data.message);
+        setInput({
+          username: "",
+          email: "",
+          password: "",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
       setLoading(false);
     }
-    
-  }
+  };
 
   return (
     <div className="flex items-center w-screen h-screen justify-center">

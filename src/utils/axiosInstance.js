@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:8000/api/v1", // your backend base URL
+  baseURL: "https://food-delivery-backend-gray.vercel.app//api/v1", // your backend base URL
 });
 
 instance.interceptors.request.use((config) => {

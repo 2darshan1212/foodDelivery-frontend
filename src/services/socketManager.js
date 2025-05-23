@@ -5,16 +5,16 @@ export const SOCKET_EVENTS = {
   // Chat events
   NEW_MESSAGE: "new_message",
   MESSAGE_RECEIVED: "message_received",
-  
+
   // Notification events
   NEW_NOTIFICATION: "new_notification",
-  
+
   // Delivery events
   ORDER_ASSIGNED: "order_assigned",
   ORDER_STATUS_UPDATED: "order_status_updated",
   DELIVERY_LOCATION_UPDATED: "delivery_location_updated",
   NEW_ORDER_AVAILABLE: "new_order_available",
-  DELIVERY_COMPLETED: "delivery_completed"
+  DELIVERY_COMPLETED: "delivery_completed",
 };
 
 // Singleton socket instance
@@ -26,9 +26,9 @@ const listeners = new Map();
 // Initialize socket connection
 export const initSocket = (userId) => {
   if (socket) return socket;
-  
+
   try {
-    socket = io("http://localhost:8000", {
+    socket = io("https://food-delivery-backend-gray.vercel.app/", {
       query: {
         userId,
       },
@@ -37,7 +37,7 @@ export const initSocket = (userId) => {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
-    
+
     console.log("Socket connection initialized");
     return socket;
   } catch (error) {
@@ -59,13 +59,13 @@ export const closeSocket = () => {
 // Add event listener to socket
 export const onEvent = (event, callback) => {
   if (!socket) return;
-  
+
   // Store the callback in our map to be able to remove it later
   if (!listeners.has(event)) {
     listeners.set(event, []);
   }
   listeners.get(event).push(callback);
-  
+
   // Attach the listener to the socket
   socket.on(event, callback);
 };
@@ -73,12 +73,12 @@ export const onEvent = (event, callback) => {
 // Remove event listener
 export const offEvent = (event, callback) => {
   if (!socket) return;
-  
+
   if (callback && listeners.has(event)) {
     // Remove specific callback
     listeners.set(
       event,
-      listeners.get(event).filter(cb => cb !== callback)
+      listeners.get(event).filter((cb) => cb !== callback)
     );
     socket.off(event, callback);
   } else {
@@ -101,4 +101,4 @@ export const getConnectionStatus = () => {
 
 // Get the socket instance - for any case where direct access is needed
 // but this should be used with caution
-export const getSocket = () => socket; 
+export const getSocket = () => socket;

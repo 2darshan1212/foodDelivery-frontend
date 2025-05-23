@@ -48,7 +48,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
     if (!text.trim()) return;
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/v1/post/${selectedPost?._id}/comment`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/post/${selectedPost?._id}/comment`,
         { text, parentId },
         {
           headers: {
@@ -78,10 +78,10 @@ const CommentDialog = ({ open, setOpen, post }) => {
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleCloseDialog} 
-      fullWidth 
+    <Dialog
+      open={open}
+      onClose={handleCloseDialog}
+      fullWidth
       maxWidth="md"
       closeAfterTransition
       disableRestoreFocus

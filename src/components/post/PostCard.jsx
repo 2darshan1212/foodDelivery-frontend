@@ -1,8 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiHeart, FiMessageCircle, FiSend, FiBookmark, FiShare, FiMapPin, FiNavigation, FiMap } from "react-icons/fi";
+import {
+  FiHeart,
+  FiMessageCircle,
+  FiSend,
+  FiBookmark,
+  FiShare,
+  FiMapPin,
+  FiNavigation,
+  FiMap,
+} from "react-icons/fi";
 import { FcLike } from "react-icons/fc";
 import { Star, StarBorder, StarHalf } from "@mui/icons-material";
-import { Avatar, Badge, Menu, MenuItem, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating, TextField, Box, Typography, CircularProgress, Grid } from "@mui/material";
+import {
+  Avatar,
+  Badge,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Rating,
+  TextField,
+  Box,
+  Typography,
+  CircularProgress,
+  Grid,
+} from "@mui/material";
 import CommentDialog from "../comment/CommentDialog";
 import ShareDialog from "../share/ShareDialog";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,53 +53,61 @@ const GoogleMapEmbed = ({ lat1, lon1, lat2, lon2, height = 400 }) => {
     const zoom = 13;
     const size = "600x400";
     const mapType = "roadmap";
-    
+
     // Center point is the midpoint between the two locations
     const centerLat = (lat1 + lat2) / 2;
     const centerLon = (lon1 + lon2) / 2;
-    
+
     // Create marker parameters for user location (red) and vendor location (blue)
     const markers = [
       `color:red|label:U|${lat1},${lon1}`,
-      `color:blue|label:V|${lat2},${lon2}`
+      `color:blue|label:V|${lat2},${lon2}`,
     ];
-    
+
     // Create a path between the two points
     const path = `color:0x0000ff80|weight:5|${lat1},${lon1}|${lat2},${lon2}`;
-    
+
     // Assemble the URL
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${centerLat},${centerLon}&zoom=${zoom}&size=${size}&maptype=${mapType}&markers=${markers.join('&markers=')}&path=${path}`;
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${centerLat},${centerLon}&zoom=${zoom}&size=${size}&maptype=${mapType}&markers=${markers.join(
+      "&markers="
+    )}&path=${path}`;
   };
-  
+
   // Alternative method using OpenStreetMap for embedded maps without API key
   const createOpenStreetMapUrl = () => {
     // Calculate center point and appropriate zoom
     const centerLat = (lat1 + lat2) / 2;
     const centerLon = (lon1 + lon2) / 2;
-    
+
     // You can adjust the zoom level based on the distance between points
     const zoom = 13;
-    
+
     // Create the iframe URL - this opens the map in a new window when clicked
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${centerLon-0.02}%2C${centerLat-0.02}%2C${centerLon+0.02}%2C${centerLat+0.02}&layer=mapnik&marker=${lat1}%2C${lon1}%3B${lat2}%2C${lon2}`;
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${
+      centerLon - 0.02
+    }%2C${centerLat - 0.02}%2C${centerLon + 0.02}%2C${
+      centerLat + 0.02
+    }&layer=mapnik&marker=${lat1}%2C${lon1}%3B${lat2}%2C${lon2}`;
   };
-  
+
   return (
-    <iframe 
-      width="100%" 
-      height={height} 
-      frameBorder="0" 
-      scrolling="no" 
-      marginHeight="0" 
-      marginWidth="0" 
+    <iframe
+      width="100%"
+      height={height}
+      frameBorder="0"
+      scrolling="no"
+      marginHeight="0"
+      marginWidth="0"
       src={createOpenStreetMapUrl()}
-      style={{ border: '1px solid #ddd', borderRadius: '4px' }}
+      style={{ border: "1px solid #ddd", borderRadius: "4px" }}
     ></iframe>
   );
 };
 
 // API base URL from environment or default to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://food-delivery-backend-gray.vercel.app/";
 
 /**
  * Calculate the distance between two points using the Haversine formula with enhanced accuracy
@@ -84,28 +118,28 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const haversineDistance = (coords1, coords2) => {
   try {
     if (!coords1 || !coords2) return null;
-    
+
     // Extract coordinates handling both array and object formats
     let lon1, lat1, lon2, lat2;
-    
+
     if (Array.isArray(coords1)) {
       [lon1, lat1] = coords1;
-    } else if (typeof coords1 === 'object') {
+    } else if (typeof coords1 === "object") {
       lon1 = parseFloat(coords1.longitude);
       lat1 = parseFloat(coords1.latitude);
     } else {
       return null;
     }
-    
+
     if (Array.isArray(coords2)) {
       [lon2, lat2] = coords2;
-    } else if (typeof coords2 === 'object') {
+    } else if (typeof coords2 === "object") {
       lon2 = parseFloat(coords2.longitude);
       lat2 = parseFloat(coords2.latitude);
     } else {
       return null;
     }
-    
+
     // Validate coordinates - must be numbers and within valid ranges
     if (isNaN(lon1) || isNaN(lat1) || isNaN(lon2) || isNaN(lat2)) return null;
     if (Math.abs(lat1) > 90 || Math.abs(lat2) > 90) return null;
@@ -116,32 +150,34 @@ const haversineDistance = (coords1, coords2) => {
     const R = 6371; // Earth's radius in km
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    
+
     // Enhanced Haversine formula for better accuracy with small distances
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) *
         Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distanceKm = R * c;
     const distanceMiles = distanceKm * 0.621371;
-    
+
     // Calculate bearing/direction
     const y = Math.sin(dLon) * Math.cos(toRad(lat2));
-    const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
-              Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
-    const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    
+    const x =
+      Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+      Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+    const bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+
     // Get cardinal direction
-    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"];
     const cardinalDirection = directions[Math.round(bearing / 45)];
-    
+
     // Calculate estimated travel time (rough estimate)
     const walkingTimeMinutes = distanceKm / 0.0833; // Assuming 5km/hour walking speed
     const drivingTimeMinutes = distanceKm / 0.5; // Assuming 30km/hour in city traffic
-    
+
     return {
       kilometers: distanceKm,
       miles: distanceMiles,
@@ -149,12 +185,12 @@ const haversineDistance = (coords1, coords2) => {
       direction: cardinalDirection,
       estimates: {
         walkingTime: walkingTimeMinutes,
-        drivingTime: drivingTimeMinutes
+        drivingTime: drivingTimeMinutes,
       },
       points: {
         origin: [lat1, lon1],
-        destination: [lat2, lon2]
-      }
+        destination: [lat2, lon2],
+      },
     };
   } catch (error) {
     console.error("Error calculating distance:", error);
@@ -165,7 +201,7 @@ const haversineDistance = (coords1, coords2) => {
 // Add this reverse geocoding function
 /**
  * Get address from coordinates using reverse geocoding
- * @param {Array} coords - [latitude, longitude] 
+ * @param {Array} coords - [latitude, longitude]
  * @returns {Promise<Object>} Address information
  */
 const getAddressFromCoords = async (coords) => {
@@ -173,34 +209,38 @@ const getAddressFromCoords = async (coords) => {
     if (!coords || !Array.isArray(coords) || coords.length !== 2) {
       return null;
     }
-    
+
     const [lat, lng] = coords;
-    
+
     // Use Nominatim API for reverse geocoding (OpenStreetMap)
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       {
         headers: {
-          'Accept-Language': 'en',
-          'User-Agent': 'FoodDeliveryApp/1.0'
-        }
+          "Accept-Language": "en",
+          "User-Agent": "FoodDeliveryApp/1.0",
+        },
       }
     );
-    
+
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    
+
     return {
       fullAddress: data.display_name,
-      city: data.address.city || data.address.town || data.address.village || 'Unknown',
-      state: data.address.state || 'Unknown',
-      country: data.address.country || 'Unknown',
-      road: data.address.road || 'Unknown',
-      postalCode: data.address.postcode || 'Unknown',
-      raw: data
+      city:
+        data.address.city ||
+        data.address.town ||
+        data.address.village ||
+        "Unknown",
+      state: data.address.state || "Unknown",
+      country: data.address.country || "Unknown",
+      road: data.address.road || "Unknown",
+      postalCode: data.address.postcode || "Unknown",
+      raw: data,
     };
   } catch (error) {
     console.error("Error fetching address:", error);
@@ -209,7 +249,14 @@ const getAddressFromCoords = async (coords) => {
 };
 
 // Rating Stars Component
-const RatingStars = ({ value, readOnly = true, precision = 0.5, size = "small", onChange, highlightSelectedOnly = false }) => {
+const RatingStars = ({
+  value,
+  readOnly = true,
+  precision = 0.5,
+  size = "small",
+  onChange,
+  highlightSelectedOnly = false,
+}) => {
   return (
     <Rating
       name="rating"
@@ -224,7 +271,13 @@ const RatingStars = ({ value, readOnly = true, precision = 0.5, size = "small", 
 };
 
 // Rating Dialog Component
-const RatingDialog = ({ open, onClose, postId, existingRating, onRatingSubmitted }) => {
+const RatingDialog = ({
+  open,
+  onClose,
+  postId,
+  existingRating,
+  onRatingSubmitted,
+}) => {
   const [rating, setRating] = useState(existingRating?.value || 0);
   const [comment, setComment] = useState(existingRating?.comment || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -380,7 +433,10 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
         </Box>
         <Box sx={{ flexGrow: 1 }}>
           {[5, 4, 3, 2, 1].map((star) => (
-            <Box key={star} sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+            <Box
+              key={star}
+              sx={{ display: "flex", alignItems: "center", mb: 0.5 }}
+            >
               <Typography variant="body2" sx={{ minWidth: "30px" }}>
                 {star}
               </Typography>
@@ -396,9 +452,16 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
               >
                 <Box
                   sx={{
-                    width: `${calculatePercentage(ratings?.distribution[star] || 0)}%`,
+                    width: `${calculatePercentage(
+                      ratings?.distribution[star] || 0
+                    )}%`,
                     height: "100%",
-                    bgcolor: star > 3 ? "success.main" : star > 1 ? "warning.main" : "error.main",
+                    bgcolor:
+                      star > 3
+                        ? "success.main"
+                        : star > 1
+                        ? "warning.main"
+                        : "error.main",
                   }}
                 />
               </Box>
@@ -409,7 +472,7 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
           ))}
         </Box>
       </Box>
-      
+
       {/* Recent ratings section */}
       {ratings?.recentRatings?.length > 0 && (
         <Box sx={{ mt: 3 }}>
@@ -417,12 +480,22 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
             Recent Reviews
           </Typography>
           {ratings.recentRatings.map((rating, index) => (
-            <Box key={index} sx={{ mb: 2, pb: 2, borderBottom: index !== ratings.recentRatings.length - 1 ? "1px solid #eee" : "none" }}>
+            <Box
+              key={index}
+              sx={{
+                mb: 2,
+                pb: 2,
+                borderBottom:
+                  index !== ratings.recentRatings.length - 1
+                    ? "1px solid #eee"
+                    : "none",
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                <Avatar 
-                  src={rating.user?.profilePicture} 
-                  alt={rating.user?.username} 
-                  sx={{ width: 32, height: 32, mr: 1 }} 
+                <Avatar
+                  src={rating.user?.profilePicture}
+                  alt={rating.user?.username}
+                  sx={{ width: 32, height: 32, mr: 1 }}
                 />
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: "bold" }}>
@@ -430,7 +503,11 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <RatingStars value={rating.value} size="small" readOnly />
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
                       {new Date(rating.createdAt).toLocaleDateString()}
                     </Typography>
                   </Box>
@@ -451,7 +528,9 @@ const RatingSummary = ({ postId, initialRating, onClose }) => {
 
 const PostCard = ({ post }) => {
   const { user } = useSelector((store) => store.auth);
-  const [liked, setLiked] = useState(post?.likes && user?._id ? post.likes.includes(user._id) : false);
+  const [liked, setLiked] = useState(
+    post?.likes && user?._id ? post.likes.includes(user._id) : false
+  );
   const [likeCount, setLikeCount] = useState(post?.likes?.length || 0);
   const [shareCount, setShareCount] = useState(post?.shareCount || 0);
   const [commentText, setCommentText] = useState("");
@@ -463,14 +542,14 @@ const PostCard = ({ post }) => {
     user?.bookmarks && post?._id ? user.bookmarks.includes(post._id) : false
   );
   const [distance, setDistance] = useState(null);
-  const [locationStatus, setLocationStatus] = useState('loading'); // 'loading', 'ready', 'missing', 'error'
-  const [locationErrorMsg, setLocationErrorMsg] = useState('');
-  
+  const [locationStatus, setLocationStatus] = useState("loading"); // 'loading', 'ready', 'missing', 'error'
+  const [locationErrorMsg, setLocationErrorMsg] = useState("");
+
   // Rating states
   const [postRating, setPostRating] = useState({
     average: post?.rating?.average || 0,
     count: post?.rating?.count || 0,
-    userRating: null
+    userRating: null,
   });
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [ratingDetailsOpen, setRatingDetailsOpen] = useState(false);
@@ -478,26 +557,26 @@ const PostCard = ({ post }) => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   // Use the cart hook
-  const { 
-    loading: cartLoading, 
-    cartItems, 
+  const {
+    loading: cartLoading,
+    cartItems,
     stockErrors,
-    addItem, 
-    increaseItem, 
-    decreaseItem, 
+    addItem,
+    increaseItem,
+    decreaseItem,
     isItemInCart,
     getItemQuantity,
-    getStockError
+    getStockError,
   } = useCart();
 
   const { posts } = useSelector((store) => store.post);
-  
+
   // Monitor stock errors to show toast notifications
   useEffect(() => {
     if (!post || !post._id) return;
-    
+
     const postStockError = getStockError(post._id);
     if (postStockError) {
       toast.warning(postStockError);
@@ -506,8 +585,15 @@ const PostCard = ({ post }) => {
 
   // Check if post is in user's bookmarks when component mounts
   useEffect(() => {
-    if (!user || !user.bookmarks || !Array.isArray(user.bookmarks) || !post || !post._id) return;
-    
+    if (
+      !user ||
+      !user.bookmarks ||
+      !Array.isArray(user.bookmarks) ||
+      !post ||
+      !post._id
+    )
+      return;
+
     setBookmarked(user.bookmarks.includes(post._id));
   }, [user, post?._id]);
 
@@ -515,7 +601,7 @@ const PostCard = ({ post }) => {
   useEffect(() => {
     const fetchUserRating = async () => {
       if (!user || !post || !post._id) return;
-      
+
       setLoadingRating(true);
       try {
         const response = await axios.get(
@@ -526,7 +612,7 @@ const PostCard = ({ post }) => {
           setPostRating({
             average: response.data.ratings.average,
             count: response.data.ratings.count,
-            userRating: response.data.ratings.userRating
+            userRating: response.data.ratings.userRating,
           });
         }
       } catch (error) {
@@ -543,7 +629,7 @@ const PostCard = ({ post }) => {
   const [showMap, setShowMap] = useState(false);
   const [addressInfo, setAddressInfo] = useState({
     user: null,
-    vendor: null
+    vendor: null,
   });
   const [locationAccuracy, setLocationAccuracy] = useState(null);
   const [distanceDetails, setDistanceDetails] = useState(null);
@@ -553,82 +639,93 @@ const PostCard = ({ post }) => {
   const calculateDistance = async () => {
     try {
       // Reset status
-      setLocationStatus('loading');
-      setLocationErrorMsg('');
+      setLocationStatus("loading");
+      setLocationErrorMsg("");
       setDistanceDetails(null);
-      
+
       // Debug logging
       console.log("User location data:", user?.location);
       console.log("Post author location data:", post?.author?.location);
-      
+
       // Check if we have both user and post location data
       if (!user?.location) {
         console.log("Missing user location data");
-        setLocationStatus('missing');
-        setLocationErrorMsg('Your location is not set');
+        setLocationStatus("missing");
+        setLocationErrorMsg("Your location is not set");
         setDistance(null);
         return;
       }
-      
+
       if (!post?.author?.location) {
         console.log("Missing post author location data");
-        setLocationStatus('missing');
+        setLocationStatus("missing");
         setLocationErrorMsg("Vendor's location is not available");
         setDistance(null);
         return;
       }
-      
+
       // Get coordinates from both locations
       const userCoords = user.location.coordinates;
       const postAuthorCoords = post.author.location.coordinates;
-      
+
       console.log("User coordinates:", userCoords);
       console.log("Post author coordinates:", postAuthorCoords);
-      
+
       // Validate coordinates
-      if (!userCoords || !Array.isArray(userCoords) || userCoords.length !== 2) {
+      if (
+        !userCoords ||
+        !Array.isArray(userCoords) ||
+        userCoords.length !== 2
+      ) {
         console.warn("Invalid user coordinates format:", userCoords);
-        setLocationStatus('error');
-        setLocationErrorMsg('Your location data is invalid');
+        setLocationStatus("error");
+        setLocationErrorMsg("Your location data is invalid");
         setDistance(null);
         return;
       }
-      
-      if (!postAuthorCoords || !Array.isArray(postAuthorCoords) || postAuthorCoords.length !== 2) {
-        console.warn("Invalid post author coordinates format:", postAuthorCoords);
-        setLocationStatus('error');
-        setLocationErrorMsg('Vendor location data is invalid');
+
+      if (
+        !postAuthorCoords ||
+        !Array.isArray(postAuthorCoords) ||
+        postAuthorCoords.length !== 2
+      ) {
+        console.warn(
+          "Invalid post author coordinates format:",
+          postAuthorCoords
+        );
+        setLocationStatus("error");
+        setLocationErrorMsg("Vendor location data is invalid");
         setDistance(null);
         return;
       }
-      
+
       // Calculate the detailed distance
       const distData = haversineDistance(userCoords, postAuthorCoords);
       console.log("Calculated distance details:", distData);
-      
+
       if (!distData) {
-        setLocationStatus('error');
-        setLocationErrorMsg('Could not calculate distance');
+        setLocationStatus("error");
+        setLocationErrorMsg("Could not calculate distance");
         setDistance(null);
       } else {
-        setLocationStatus('ready');
+        setLocationStatus("ready");
         setDistance(distData.kilometers);
         setDistanceDetails(distData);
-        
+
         // Fetch address information
         try {
           // Need to reverse coordinates for Nominatim API [lat, lon] instead of [lon, lat]
           const userAddrCoords = [userCoords[1], userCoords[0]];
           const vendorAddrCoords = [postAuthorCoords[1], postAuthorCoords[0]];
-          
+
           const [userAddr, vendorAddr] = await Promise.all([
             getAddressFromCoords(userAddrCoords),
-            getAddressFromCoords(vendorAddrCoords)
+            getAddressFromCoords(vendorAddrCoords),
           ]);
-          
+
           setAddressInfo({
             user: userAddr,
-            vendor: vendorAddr
+            vendor: vendorAddr,
           });
         } catch (addrError) {
           console.error("Error fetching address info:", addrError);
@@ -637,8 +734,8 @@ const PostCard = ({ post }) => {
       }
     } catch (error) {
       console.error("Error in distance calculation:", error);
-      setLocationStatus('error');
-      setLocationErrorMsg('An error occurred calculating distance');
+      setLocationStatus("error");
+      setLocationErrorMsg("An error occurred calculating distance");
       setDistance(null);
     }
   };
@@ -651,29 +748,33 @@ const PostCard = ({ post }) => {
   // Replace the existing updateUserLocation function with this enhanced version:
   const updateUserLocation = async () => {
     try {
-      setLocationStatus('updating');
-      setLocationErrorMsg('');
-      
+      setLocationStatus("updating");
+      setLocationErrorMsg("");
+
       if (navigator.geolocation) {
         // Use high accuracy for better precision
         const options = {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 0
+          maximumAge: 0,
         };
-        
+
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const userLocation = {
               longitude: position.coords.longitude,
               latitude: position.coords.latitude,
             };
-            
+
             // Store accuracy for display
             setLocationAccuracy(position.coords.accuracy);
-            
-            console.log("Got position with accuracy:", position.coords.accuracy, "meters");
-            
+
+            console.log(
+              "Got position with accuracy:",
+              position.coords.accuracy,
+              "meters"
+            );
+
             try {
               const res = await axios.post(
                 `${API_BASE_URL}/api/v1/user/location`,
@@ -683,58 +784,64 @@ const PostCard = ({ post }) => {
                   withCredentials: true,
                 }
               );
-              
+
               if (res.data.success) {
                 toast.success("Location updated successfully");
                 // Instead of reloading, update the user location in state
-                const updatedUser = {...user, location: {
-                  type: "Point",
-                  coordinates: [userLocation.longitude, userLocation.latitude]
-                }};
-                
+                const updatedUser = {
+                  ...user,
+                  location: {
+                    type: "Point",
+                    coordinates: [
+                      userLocation.longitude,
+                      userLocation.latitude,
+                    ],
+                  },
+                };
+
                 // Here we would update the user in redux, but for now we'll reload the page
                 window.location.reload();
               }
             } catch (error) {
               console.error("Error updating location:", error);
-              setLocationStatus('error');
-              setLocationErrorMsg('Failed to save your location');
+              setLocationStatus("error");
+              setLocationErrorMsg("Failed to save your location");
               toast.error("Failed to update your location");
             }
           },
           (error) => {
             console.error("Geolocation error:", error);
-            setLocationStatus('error');
-            
+            setLocationStatus("error");
+
             switch (error.code) {
               case error.PERMISSION_DENIED:
-                setLocationErrorMsg('Location permission denied');
+                setLocationErrorMsg("Location permission denied");
                 toast.error("You denied the location permission");
                 break;
               case error.POSITION_UNAVAILABLE:
-                setLocationErrorMsg('Location information unavailable');
+                setLocationErrorMsg("Location information unavailable");
                 toast.error("Location information is unavailable");
                 break;
               case error.TIMEOUT:
-                setLocationErrorMsg('Location request timed out');
+                setLocationErrorMsg("Location request timed out");
                 toast.error("Location request timed out");
                 break;
               default:
-                setLocationErrorMsg('Unknown location error');
+                setLocationErrorMsg("Unknown location error");
                 toast.error("An unknown error occurred");
             }
           },
           options
         );
       } else {
-        setLocationStatus('error');
-        setLocationErrorMsg('Geolocation not supported');
+        setLocationStatus("error");
+        setLocationErrorMsg("Geolocation not supported");
         toast.error("Geolocation is not supported by your browser");
       }
     } catch (error) {
       console.error("Location update error:", error);
-      setLocationStatus('error');
-      setLocationErrorMsg('Failed to update location');
+      setLocationStatus("error");
+      setLocationErrorMsg("Failed to update location");
       toast.error("Failed to update location");
     }
   };
@@ -744,26 +851,28 @@ const PostCard = ({ post }) => {
     setShowMap(true);
   };
 
-  // Replace the renderDistance function with this improved version 
+  // Replace the renderDistance function with this improved version
   const renderDistance = () => {
-    if (locationStatus === 'updating') {
+    if (locationStatus === "updating") {
       return (
         <p className="text-xs text-blue-500 flex items-center gap-1 animate-pulse">
           <FiNavigation size={12} className="animate-spin" />
           Updating location...
         </p>
       );
-    } else if (locationStatus === 'ready' && distance !== null) {
+    } else if (locationStatus === "ready" && distance !== null) {
       return (
         <div className="flex flex-col">
-          <p 
+          <p
             className="text-xs text-green-600 flex items-center gap-1 cursor-pointer"
             onClick={handleShowMap}
           >
             <FiMapPin size={12} />
-            {distance < 1 
-              ? `${(distance * 1000).toFixed(0)}m ${distanceDetails?.direction || ''}`
-              : `${distance.toFixed(1)}km ${distanceDetails?.direction || ''}`}
+            {distance < 1
+              ? `${(distance * 1000).toFixed(0)}m ${
+                  distanceDetails?.direction || ""
+                }`
+              : `${distance.toFixed(1)}km ${distanceDetails?.direction || ""}`}
             <FiMap size={12} className="ml-1 text-blue-500" />
           </p>
           {distanceDetails && (
@@ -773,10 +882,10 @@ const PostCard = ({ post }) => {
           )}
         </div>
       );
-    } else if (locationStatus === 'missing' || locationStatus === 'error') {
+    } else if (locationStatus === "missing" || locationStatus === "error") {
       return (
-        <Tooltip title={locationErrorMsg || 'Location data unavailable'}>
-          <p 
+        <Tooltip title={locationErrorMsg || "Location data unavailable"}>
+          <p
             className="text-xs text-orange-500 flex items-center gap-1 cursor-pointer"
             onClick={updateUserLocation}
           >
@@ -801,10 +910,10 @@ const PostCard = ({ post }) => {
         toast.error("Cannot like post: missing post or user information");
         return;
       }
-      
+
       const action = liked ? "dislike" : "like";
       const res = await axios.get(
-        `http://localhost:8000/api/v1/post/${post._id}/${action}`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/post/${post._id}/${action}`,
         { withCredentials: true }
       );
 
@@ -820,10 +929,10 @@ const PostCard = ({ post }) => {
         dispatch(setPosts(updatedPosts));
 
         setLiked(!liked);
-        
+
         setLikeCount(updatedLikes.length);
         // Server will handle notifications via socket
-        
+
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -833,7 +942,7 @@ const PostCard = ({ post }) => {
 
   const handleComment = async () => {
     if (!commentText.trim()) return;
-    
+
     if (!post || !post._id) {
       toast.error("Cannot comment: missing post information");
       return;
@@ -841,7 +950,7 @@ const PostCard = ({ post }) => {
 
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/v1/post/${post._id}/comment`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/post/${post._id}/comment`,
         { text: commentText },
         {
           headers: { "Content-Type": "application/json" },
@@ -868,7 +977,7 @@ const PostCard = ({ post }) => {
   const handleDeletePost = async () => {
     try {
       const res = await axios.delete(
-        `http://localhost:8000/api/v1/post/delete/${post._id}`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/post/delete/${post._id}`,
         { withCredentials: true }
       );
 
@@ -892,43 +1001,43 @@ const PostCard = ({ post }) => {
         toast.error("Cannot bookmark: missing post information");
         return;
       }
-      
+
       if (!user || !user._id) {
         toast.error("Please login to bookmark posts");
         return;
       }
-      
+
       console.log(`Attempting to toggle bookmark for post: ${post._id}`);
-      
+
       // Optimistically update UI state for better UX
       const newBookmarkState = !bookmarked;
       setBookmarked(newBookmarkState);
-      
+
       // Use API_BASE_URL constant for consistency
       const res = await axios.get(
         `${API_BASE_URL}/api/v1/post/${post._id}/bookmark`,
-        { 
+        {
           withCredentials: true,
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
       if (res.data.success) {
         console.log(`Bookmark ${res.data.type} for post ${post._id} success`);
-        
+
         // Update bookmarks in the auth store
         dispatch(updateBookmarks(post._id));
         toast.success(res.data.message);
-        
+
         // Sync bookmarks from server to ensure consistency
         setTimeout(() => {
           dispatch(syncUserBookmarks())
             .unwrap()
-            .then(bookmarks => {
+            .then((bookmarks) => {
               console.log("Bookmarks synced after bookmark action:", bookmarks);
-              
+
               // Ensure UI state matches backend state
               if (bookmarks) {
                 const isBookmarked = bookmarks.includes(post._id);
@@ -938,7 +1047,7 @@ const PostCard = ({ post }) => {
                 }
               }
             })
-            .catch(err => {
+            .catch((err) => {
               console.error("Failed to sync bookmarks after action:", err);
             });
         }, 500); // Small delay to allow backend to complete its operation
@@ -961,8 +1070,8 @@ const PostCard = ({ post }) => {
   };
 
   const handleShareSuccess = () => {
-    setShareCount(prevCount => prevCount + 1);
-    
+    setShareCount((prevCount) => prevCount + 1);
+
     // Update share count in posts state
     const updatedPosts = posts.map((p) =>
       p._id === post._id ? { ...p, shareCount: (p.shareCount || 0) + 1 } : p
@@ -977,7 +1086,7 @@ const PostCard = ({ post }) => {
       toast.error("Cannot add to cart: missing post information");
       return;
     }
-    
+
     // Create the cart item with all necessary details
     const cartItem = {
       _id: post._id,
@@ -989,38 +1098,40 @@ const PostCard = ({ post }) => {
       spicyLevel: post.spicyLevel || "medium",
       category: post.category || "Other",
     };
-    
+
     // Add to cart using the hook
     addItem(cartItem);
-    
+
     // Animate the cart icon
     animateCartAddition();
   };
-  
+
   // Animation function
   const animateCartAddition = () => {
     try {
-      const cartIcon = document.querySelector(".cart-icon") || document.querySelector("[data-testid='ShoppingCartIcon']");
+      const cartIcon =
+        document.querySelector(".cart-icon") ||
+        document.querySelector("[data-testid='ShoppingCartIcon']");
       if (cartIcon) {
         cartIcon.classList.add("cart-icon-pulse");
         setTimeout(() => {
           cartIcon.classList.remove("cart-icon-pulse");
         }, 1000);
-        
+
         // Create a floating animation from the product to the cart icon
         const productElement = document.getElementById(`post-${post._id}`);
-        
+
         if (productElement && cartIcon) {
           // Create a flying image element
           const flyingImg = document.createElement("img");
           flyingImg.src = post.image || "/default-food-image.jpg";
           flyingImg.className = "flying-cart-item";
           flyingImg.style.position = "fixed";
-          
+
           // Get positions
           const productRect = productElement.getBoundingClientRect();
           const cartRect = cartIcon.getBoundingClientRect();
-          
+
           // Set starting position
           flyingImg.style.width = "50px";
           flyingImg.style.height = "50px";
@@ -1028,20 +1139,28 @@ const PostCard = ({ post }) => {
           flyingImg.style.objectFit = "cover";
           flyingImg.style.zIndex = "9999";
           flyingImg.style.transition = "all 0.8s ease-in-out";
-          flyingImg.style.left = `${productRect.left + productRect.width / 2 - 25}px`;
-          flyingImg.style.top = `${productRect.top + productRect.height / 2 - 25}px`;
-          
+          flyingImg.style.left = `${
+            productRect.left + productRect.width / 2 - 25
+          }px`;
+          flyingImg.style.top = `${
+            productRect.top + productRect.height / 2 - 25
+          }px`;
+
           // Add to DOM
           document.body.appendChild(flyingImg);
-          
+
           // Trigger animation
           setTimeout(() => {
-            flyingImg.style.left = `${cartRect.left + cartRect.width / 2 - 25}px`;
-            flyingImg.style.top = `${cartRect.top + cartRect.height / 2 - 25}px`;
+            flyingImg.style.left = `${
+              cartRect.left + cartRect.width / 2 - 25
+            }px`;
+            flyingImg.style.top = `${
+              cartRect.top + cartRect.height / 2 - 25
+            }px`;
             flyingImg.style.opacity = "0.5";
             flyingImg.style.transform = "scale(0.3)";
           }, 10);
-          
+
           // Remove from DOM after animation
           setTimeout(() => {
             if (flyingImg && flyingImg.parentNode) {
@@ -1067,7 +1186,7 @@ const PostCard = ({ post }) => {
   const handleRatingClick = () => {
     setRatingDialogOpen(true);
   };
-  
+
   // Navigate to post detail page
   const handleViewPostDetail = () => {
     if (post && post._id) {
@@ -1079,13 +1198,16 @@ const PostCard = ({ post }) => {
     setPostRating({
       average: newRating.average,
       count: newRating.count,
-      userRating: newRating.userRating
+      userRating: newRating.userRating,
     });
-    
+
     // Update post in global state to reflect new rating
-    const updatedPosts = posts.map(p => 
-      p._id === post._id 
-        ? { ...p, rating: { average: newRating.average, count: newRating.count } } 
+    const updatedPosts = posts.map((p) =>
+      p._id === post._id
+        ? {
+            ...p,
+            rating: { average: newRating.average, count: newRating.count },
+          }
         : p
     );
     dispatch(setPosts(updatedPosts));
@@ -1099,11 +1221,11 @@ const PostCard = ({ post }) => {
   const renderRating = () => {
     return (
       <Box sx={{ display: "flex", alignItems: "center", mt: 1, mb: 1 }}>
-        <Box 
-          sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            cursor: "pointer" 
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            cursor: "pointer",
           }}
           onClick={handleViewRatings}
         >
@@ -1112,10 +1234,10 @@ const PostCard = ({ post }) => {
             ({postRating.count})
           </Typography>
         </Box>
-        <Button 
-          size="small" 
-          variant="outlined" 
-          sx={{ ml: 'auto', borderRadius: '20px', fontSize: '0.7rem' }}
+        <Button
+          size="small"
+          variant="outlined"
+          sx={{ ml: "auto", borderRadius: "20px", fontSize: "0.7rem" }}
           onClick={handleRatingClick}
           color={postRating.userRating ? "success" : "primary"}
         >
@@ -1126,10 +1248,16 @@ const PostCard = ({ post }) => {
   };
 
   return (
-    <div id={`post-${post._id}`} className="relative bg-white rounded-lg shadow-sm overflow-hidden mb-4 w-full mx-auto max-w-full">
+    <div
+      id={`post-${post._id}`}
+      className="relative bg-white rounded-lg shadow-sm overflow-hidden mb-4 w-full mx-auto max-w-full"
+    >
       <div className="flex items-center justify-between p-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Link to={`/profile/${post.author?._id}`} className="rounded-full overflow-hidden border border-gray-100">
+          <Link
+            to={`/profile/${post.author?._id}`}
+            className="rounded-full overflow-hidden border border-gray-100"
+          >
             {post.author?._id === user?._id ? (
               <Badge color="primary" variant="dot">
                 <Avatar
@@ -1180,7 +1308,7 @@ const PostCard = ({ post }) => {
         </div>
       </div>
 
-      <div 
+      <div
         className="w-full h-64 sm:h-72 md:h-80 lg:h-96 bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer"
         onClick={handleViewPostDetail}
       >
@@ -1202,7 +1330,7 @@ const PostCard = ({ post }) => {
       </div>
 
       <div className="p-4">
-        <p 
+        <p
           className="text-gray-800 mb-3 text-sm sm:text-base cursor-pointer hover:text-orange-500"
           onClick={handleViewPostDetail}
         >
@@ -1260,16 +1388,18 @@ const PostCard = ({ post }) => {
             <FiMessageCircle />
           </button>
 
-          <button 
+          <button
             onClick={handleShare}
             className="hover:text-green-500 transition cursor-pointer"
           >
             <FiShare />
           </button>
-          
-          <button 
-            onClick={handleBookmark} 
-            className={`transition cursor-pointer ${bookmarked ? "text-blue-500" : ""}`}
+
+          <button
+            onClick={handleBookmark}
+            className={`transition cursor-pointer ${
+              bookmarked ? "text-blue-500" : ""
+            }`}
           >
             <FiBookmark />
           </button>
@@ -1297,7 +1427,7 @@ const PostCard = ({ post }) => {
           setOpen={setCommentDialogOpen}
           post={post}
         />
-        
+
         <ShareDialog
           open={shareDialogOpen}
           onClose={() => setShareDialogOpen(false)}
@@ -1356,16 +1486,16 @@ const PostCard = ({ post }) => {
       >
         <DialogTitle>Ratings & Reviews</DialogTitle>
         <DialogContent dividers>
-          <RatingSummary 
-            postId={post._id} 
+          <RatingSummary
+            postId={post._id}
             initialRating={postRating}
             onClose={() => setRatingDetailsOpen(false)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRatingDetailsOpen(false)}>Close</Button>
-          <Button 
-            color="primary" 
+          <Button
+            color="primary"
             variant="contained"
             onClick={() => {
               setRatingDetailsOpen(false);
@@ -1387,64 +1517,80 @@ const PostCard = ({ post }) => {
         <DialogTitle>
           Delivery Distance Map
           {locationAccuracy && (
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.5 }}
+            >
               Location accuracy: ±{Math.round(locationAccuracy)} meters
             </Typography>
           )}
         </DialogTitle>
         <DialogContent>
-          {distanceDetails && distanceDetails.points.origin && distanceDetails.points.destination && (
-            <Box sx={{ height: 400, width: '100%' }}>
-              <GoogleMapEmbed
-                lat1={distanceDetails.points.origin[0]}
-                lon1={distanceDetails.points.origin[1]}
-                lat2={distanceDetails.points.destination[0]}
-                lon2={distanceDetails.points.destination[1]}
-                height={400}
-              />
-            </Box>
-          )}
-          
+          {distanceDetails &&
+            distanceDetails.points.origin &&
+            distanceDetails.points.destination && (
+              <Box sx={{ height: 400, width: "100%" }}>
+                <GoogleMapEmbed
+                  lat1={distanceDetails.points.origin[0]}
+                  lon1={distanceDetails.points.origin[1]}
+                  lat2={distanceDetails.points.destination[0]}
+                  lon2={distanceDetails.points.destination[1]}
+                  height={400}
+                />
+              </Box>
+            )}
+
           <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>Distance Details</Typography>
-            
+            <Typography variant="subtitle1" gutterBottom>
+              Distance Details
+            </Typography>
+
             <Grid container spacing={2}>
               <Grid item xs={6} md={3}>
                 <Typography variant="body2" component="div">
-                  <strong>Distance:</strong> {distanceDetails?.kilometers.toFixed(2)} km ({distanceDetails?.miles.toFixed(2)} miles)
+                  <strong>Distance:</strong>{" "}
+                  {distanceDetails?.kilometers.toFixed(2)} km (
+                  {distanceDetails?.miles.toFixed(2)} miles)
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={6} md={3}>
                 <Typography variant="body2" component="div">
-                  <strong>Direction:</strong> {distanceDetails?.direction} ({Math.round(distanceDetails?.bearing)}°)
+                  <strong>Direction:</strong> {distanceDetails?.direction} (
+                  {Math.round(distanceDetails?.bearing)}°)
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={6} md={3}>
                 <Typography variant="body2" component="div">
-                  <strong>Est. driving time:</strong> {Math.ceil(distanceDetails?.estimates.drivingTime)} mins
+                  <strong>Est. driving time:</strong>{" "}
+                  {Math.ceil(distanceDetails?.estimates.drivingTime)} mins
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={6} md={3}>
                 <Typography variant="body2" component="div">
-                  <strong>Est. walking time:</strong> {Math.ceil(distanceDetails?.estimates.walkingTime)} mins
+                  <strong>Est. walking time:</strong>{" "}
+                  {Math.ceil(distanceDetails?.estimates.walkingTime)} mins
                 </Typography>
               </Grid>
             </Grid>
-            
+
             {addressInfo?.user && addressInfo?.vendor && (
               <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle1" gutterBottom>Address Information</Typography>
-                
+                <Typography variant="subtitle1" gutterBottom>
+                  Address Information
+                </Typography>
+
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" component="div" sx={{ mb: 1 }}>
                       <strong>Your location:</strong>
                     </Typography>
                     <Typography variant="body2" component="div">
-                      {addressInfo.user.road}, {addressInfo.user.city}, {addressInfo.user.state}
+                      {addressInfo.user.road}, {addressInfo.user.city},{" "}
+                      {addressInfo.user.state}
                     </Typography>
                     {addressInfo.user.postalCode && (
                       <Typography variant="body2" component="div">
@@ -1452,13 +1598,14 @@ const PostCard = ({ post }) => {
                       </Typography>
                     )}
                   </Grid>
-                  
+
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" component="div" sx={{ mb: 1 }}>
                       <strong>Vendor location:</strong>
                     </Typography>
                     <Typography variant="body2" component="div">
-                      {addressInfo.vendor.road}, {addressInfo.vendor.city}, {addressInfo.vendor.state}
+                      {addressInfo.vendor.road}, {addressInfo.vendor.city},{" "}
+                      {addressInfo.vendor.state}
                     </Typography>
                     {addressInfo.vendor.postalCode && (
                       <Typography variant="body2" component="div">
@@ -1473,9 +1620,9 @@ const PostCard = ({ post }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowMap(false)}>Close</Button>
-          <Button 
-            variant="contained" 
-            color="primary" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={updateUserLocation}
           >
             Update My Location

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   Container,
@@ -29,8 +29,8 @@ import {
   InputAdornment,
   Tooltip,
   Pagination,
-  Grid
-} from '@mui/material';
+  Grid,
+} from "@mui/material";
 import {
   Search as SearchIcon,
   Edit as EditIcon,
@@ -38,20 +38,29 @@ import {
   Person as PersonIcon,
   Block as BlockIcon,
   Check as CheckIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
 
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openAdminDialog, setOpenAdminDialog] = useState(false);
   const [openBlockDialog, setOpenBlockDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [formData, setFormData] = useState({ username: '', email: '', isAdmin: false, isBlocked: false });
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    isAdmin: false,
+    isBlocked: false,
+  });
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
@@ -68,28 +77,31 @@ const UsersManagement = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Create query params
       const params = new URLSearchParams();
-      params.append('page', page);
-      params.append('limit', ROWS_PER_PAGE);
+      params.append("page", page);
+      params.append("limit", ROWS_PER_PAGE);
       if (searchQuery) {
-        params.append('q', searchQuery);
+        params.append("q", searchQuery);
       }
-      
-      const response = await axios.get(`http://localhost:8000/api/v1/user/admin/users?${params.toString()}`, {
-        withCredentials: true
-      });
-      
+
+      const response = await axios.get(
+        `https://food-delivery-backend-gray.vercel.app//api/v1/user/admin/users?${params.toString()}`,
+        {
+          withCredentials: true,
+        }
+      );
+
       if (response.data.success) {
         setUsers(response.data.users || []);
         setTotalPages(response.data.pagination?.pages || 1);
       } else {
-        throw new Error(response.data.message || 'Failed to fetch users');
+        throw new Error(response.data.message || "Failed to fetch users");
       }
     } catch (err) {
-      console.error('Error fetching users:', err);
-      setError('Failed to load users. Please try again.');
+      console.error("Error fetching users:", err);
+      setError("Failed to load users. Please try again.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -105,8 +117,9 @@ const UsersManagement = () => {
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value, checked } = e.target;
-    const newValue = name === 'isAdmin' || name === 'isBlocked' ? checked : value;
-    setFormData(prev => ({ ...prev, [name]: newValue }));
+    const newValue =
+      name === "isAdmin" || name === "isBlocked" ? checked : value;
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
   // Handle page change
@@ -127,7 +140,7 @@ const UsersManagement = () => {
       username: user.username,
       email: user.email,
       isAdmin: user.isAdmin || false,
-      isBlocked: user.isBlocked || false
+      isBlocked: user.isBlocked || false,
     });
     setOpenEditDialog(true);
   };
@@ -155,34 +168,38 @@ const UsersManagement = () => {
   const handleUpdateUser = async () => {
     try {
       setLoading(true);
-      
-      const response = await axios.put(`http://localhost:8000/api/v1/user/admin/${selectedUser._id}`, {
-        username: formData.username,
-        email: formData.email,
-        isAdmin: formData.isAdmin,
-        isBlocked: formData.isBlocked
-      }, {
-        withCredentials: true
-      });
-      
+
+      const response = await axios.put(
+        `https://food-delivery-backend-gray.vercel.app//api/v1/user/admin/${selectedUser._id}`,
+        {
+          username: formData.username,
+          email: formData.email,
+          isAdmin: formData.isAdmin,
+          isBlocked: formData.isBlocked,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
       if (response.data.success) {
         setNotification({
           open: true,
-          message: 'User updated successfully!',
-          severity: 'success'
+          message: "User updated successfully!",
+          severity: "success",
         });
-        
+
         handleCloseDialogs();
         fetchUsers();
       } else {
-        throw new Error(response.data.message || 'Failed to update user');
+        throw new Error(response.data.message || "Failed to update user");
       }
     } catch (err) {
-      console.error('Error updating user:', err);
+      console.error("Error updating user:", err);
       setNotification({
         open: true,
-        message: err.response?.data?.message || 'Failed to update user',
-        severity: 'error'
+        message: err.response?.data?.message || "Failed to update user",
+        severity: "error",
       });
     } finally {
       setLoading(false);
@@ -193,32 +210,41 @@ const UsersManagement = () => {
   const handleToggleAdmin = async () => {
     try {
       setLoading(true);
-      
+
       const newAdminStatus = !selectedUser.isAdmin;
-      const endpoint = newAdminStatus ? 'make-admin' : 'remove-admin';
-      
-      const response = await axios.put(`http://localhost:8000/api/v1/user/admin/${selectedUser._id}/${endpoint}`, {}, {
-        withCredentials: true
-      });
-      
+      const endpoint = newAdminStatus ? "make-admin" : "remove-admin";
+
+      const response = await axios.put(
+        `https://food-delivery-backend-gray.vercel.app//api/v1/user/admin/${selectedUser._id}/${endpoint}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
       if (response.data.success) {
         setNotification({
           open: true,
-          message: `User ${newAdminStatus ? 'promoted to admin' : 'demoted from admin'} successfully!`,
-          severity: 'success'
+          message: `User ${
+            newAdminStatus ? "promoted to admin" : "demoted from admin"
+          } successfully!`,
+          severity: "success",
         });
-        
+
         handleCloseDialogs();
         fetchUsers();
       } else {
-        throw new Error(response.data.message || `Failed to ${newAdminStatus ? 'promote' : 'demote'} user`);
+        throw new Error(
+          response.data.message ||
+            `Failed to ${newAdminStatus ? "promote" : "demote"} user`
+        );
       }
     } catch (err) {
-      console.error('Error toggling admin status:', err);
+      console.error("Error toggling admin status:", err);
       setNotification({
         open: true,
-        message: err.response?.data?.message || 'Failed to update admin status',
-        severity: 'error'
+        message: err.response?.data?.message || "Failed to update admin status",
+        severity: "error",
       });
     } finally {
       setLoading(false);
@@ -229,32 +255,41 @@ const UsersManagement = () => {
   const handleToggleBlock = async () => {
     try {
       setLoading(true);
-      
+
       const newBlockStatus = !selectedUser.isBlocked;
-      const endpoint = newBlockStatus ? 'block' : 'unblock';
-      
-      const response = await axios.put(`http://localhost:8000/api/v1/user/admin/${selectedUser._id}/${endpoint}`, {}, {
-        withCredentials: true
-      });
-      
+      const endpoint = newBlockStatus ? "block" : "unblock";
+
+      const response = await axios.put(
+        `https://food-delivery-backend-gray.vercel.app//api/v1/user/admin/${selectedUser._id}/${endpoint}`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
       if (response.data.success) {
         setNotification({
           open: true,
-          message: `User ${newBlockStatus ? 'blocked' : 'unblocked'} successfully!`,
-          severity: 'success'
+          message: `User ${
+            newBlockStatus ? "blocked" : "unblocked"
+          } successfully!`,
+          severity: "success",
         });
-        
+
         handleCloseDialogs();
         fetchUsers();
       } else {
-        throw new Error(response.data.message || `Failed to ${newBlockStatus ? 'block' : 'unblock'} user`);
+        throw new Error(
+          response.data.message ||
+            `Failed to ${newBlockStatus ? "block" : "unblock"} user`
+        );
       }
     } catch (err) {
-      console.error('Error toggling block status:', err);
+      console.error("Error toggling block status:", err);
       setNotification({
         open: true,
-        message: err.response?.data?.message || 'Failed to update block status',
-        severity: 'error'
+        message: err.response?.data?.message || "Failed to update block status",
+        severity: "error",
       });
     } finally {
       setLoading(false);
@@ -263,12 +298,12 @@ const UsersManagement = () => {
 
   // Close notification
   const handleCloseNotification = () => {
-    setNotification(prev => ({ ...prev, open: false }));
+    setNotification((prev) => ({ ...prev, open: false }));
   };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
         <Typography variant="h4" component="h1" fontWeight="bold">
           Users Management
         </Typography>
@@ -278,7 +313,7 @@ const UsersManagement = () => {
           onClick={handleRefresh}
           disabled={refreshing}
         >
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          {refreshing ? "Refreshing..." : "Refresh"}
         </Button>
       </Box>
 
@@ -294,7 +329,7 @@ const UsersManagement = () => {
               <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
-            )
+            ),
           }}
         />
       </Paper>
@@ -306,20 +341,24 @@ const UsersManagement = () => {
       )}
 
       {loading && !users.length ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
           <CircularProgress />
         </Box>
       ) : (
         <>
           <TableContainer component={Paper} sx={{ mb: 2 }}>
             <Table>
-              <TableHead sx={{ bgcolor: 'primary.main' }}>
+              <TableHead sx={{ bgcolor: "primary.main" }}>
                 <TableRow>
-                  <TableCell sx={{ color: 'white' }}>User</TableCell>
-                  <TableCell sx={{ color: 'white' }}>Email</TableCell>
-                  <TableCell sx={{ color: 'white' }}>Status</TableCell>
-                  <TableCell sx={{ color: 'white' }} align="center">Role</TableCell>
-                  <TableCell sx={{ color: 'white' }} align="right">Actions</TableCell>
+                  <TableCell sx={{ color: "white" }}>User</TableCell>
+                  <TableCell sx={{ color: "white" }}>Email</TableCell>
+                  <TableCell sx={{ color: "white" }}>Status</TableCell>
+                  <TableCell sx={{ color: "white" }} align="center">
+                    Role
+                  </TableCell>
+                  <TableCell sx={{ color: "white" }} align="right">
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -333,9 +372,9 @@ const UsersManagement = () => {
                   users.map((user) => (
                     <TableRow key={user._id} hover>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar 
-                            src={user.profilePicture} 
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Avatar
+                            src={user.profilePicture}
                             alt={user.username}
                             sx={{ mr: 2 }}
                           />
@@ -347,16 +386,16 @@ const UsersManagement = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         {user.isBlocked ? (
-                          <Chip 
-                            label="Blocked" 
-                            color="error" 
+                          <Chip
+                            label="Blocked"
+                            color="error"
                             size="small"
                             icon={<BlockIcon />}
                           />
                         ) : (
-                          <Chip 
-                            label="Active" 
-                            color="success" 
+                          <Chip
+                            label="Active"
+                            color="success"
                             size="small"
                             icon={<CheckIcon />}
                           />
@@ -364,15 +403,15 @@ const UsersManagement = () => {
                       </TableCell>
                       <TableCell align="center">
                         {user.isAdmin ? (
-                          <Chip 
-                            label="Admin" 
-                            color="primary" 
+                          <Chip
+                            label="Admin"
+                            color="primary"
                             size="small"
                             icon={<AdminIcon />}
                           />
                         ) : (
-                          <Chip 
-                            label="User" 
+                          <Chip
+                            label="User"
                             variant="outlined"
                             size="small"
                             icon={<PersonIcon />}
@@ -381,8 +420,8 @@ const UsersManagement = () => {
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="Edit User">
-                          <IconButton 
-                            color="primary" 
+                          <IconButton
+                            color="primary"
                             onClick={() => handleOpenEditDialog(user)}
                             size="small"
                             sx={{ mr: 1 }}
@@ -390,10 +429,12 @@ const UsersManagement = () => {
                             <EditIcon />
                           </IconButton>
                         </Tooltip>
-                        
-                        <Tooltip title={user.isAdmin ? "Remove Admin" : "Make Admin"}>
-                          <IconButton 
-                            color={user.isAdmin ? "secondary" : "info"} 
+
+                        <Tooltip
+                          title={user.isAdmin ? "Remove Admin" : "Make Admin"}
+                        >
+                          <IconButton
+                            color={user.isAdmin ? "secondary" : "info"}
                             onClick={() => handleOpenAdminDialog(user)}
                             size="small"
                             sx={{ mr: 1 }}
@@ -401,9 +442,11 @@ const UsersManagement = () => {
                             <AdminIcon />
                           </IconButton>
                         </Tooltip>
-                        
-                        <Tooltip title={user.isBlocked ? "Unblock User" : "Block User"}>
-                          <IconButton 
+
+                        <Tooltip
+                          title={user.isBlocked ? "Unblock User" : "Block User"}
+                        >
+                          <IconButton
                             color={user.isBlocked ? "success" : "error"}
                             onClick={() => handleOpenBlockDialog(user)}
                             size="small"
@@ -418,14 +461,14 @@ const UsersManagement = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Pagination 
-              count={totalPages} 
-              page={page} 
-              onChange={handlePageChange} 
-              color="primary" 
-              showFirstButton 
+
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              showFirstButton
               showLastButton
             />
           </Box>
@@ -433,7 +476,12 @@ const UsersManagement = () => {
       )}
 
       {/* Edit User Dialog */}
-      <Dialog open={openEditDialog} onClose={handleCloseDialogs} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCloseDialogs}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -488,12 +536,12 @@ const UsersManagement = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialogs}>Cancel</Button>
-          <Button 
-            onClick={handleUpdateUser} 
-            variant="contained" 
+          <Button
+            onClick={handleUpdateUser}
+            variant="contained"
             disabled={!formData.username || !formData.email || loading}
           >
-            {loading ? <CircularProgress size={24} /> : 'Update'}
+            {loading ? <CircularProgress size={24} /> : "Update"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -501,25 +549,32 @@ const UsersManagement = () => {
       {/* Admin Status Dialog */}
       <Dialog open={openAdminDialog} onClose={handleCloseDialogs}>
         <DialogTitle>
-          {selectedUser?.isAdmin ? 'Remove Admin Privileges' : 'Grant Admin Privileges'}
+          {selectedUser?.isAdmin
+            ? "Remove Admin Privileges"
+            : "Grant Admin Privileges"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {selectedUser?.isAdmin 
+            {selectedUser?.isAdmin
               ? `Are you sure you want to remove admin privileges from ${selectedUser?.username}?`
-              : `Are you sure you want to grant admin privileges to ${selectedUser?.username}? This will give them access to the admin panel and all administrative functions.`
-            }
+              : `Are you sure you want to grant admin privileges to ${selectedUser?.username}? This will give them access to the admin panel and all administrative functions.`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialogs}>Cancel</Button>
-          <Button 
-            onClick={handleToggleAdmin} 
+          <Button
+            onClick={handleToggleAdmin}
             color={selectedUser?.isAdmin ? "error" : "primary"}
             variant="contained"
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : (selectedUser?.isAdmin ? 'Remove Admin' : 'Make Admin')}
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : selectedUser?.isAdmin ? (
+              "Remove Admin"
+            ) : (
+              "Make Admin"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -527,25 +582,30 @@ const UsersManagement = () => {
       {/* Block User Dialog */}
       <Dialog open={openBlockDialog} onClose={handleCloseDialogs}>
         <DialogTitle>
-          {selectedUser?.isBlocked ? 'Unblock User' : 'Block User'}
+          {selectedUser?.isBlocked ? "Unblock User" : "Block User"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {selectedUser?.isBlocked 
+            {selectedUser?.isBlocked
               ? `Are you sure you want to unblock ${selectedUser?.username}? This will allow them to use the system again.`
-              : `Are you sure you want to block ${selectedUser?.username}? This will prevent them from logging in and using the system.`
-            }
+              : `Are you sure you want to block ${selectedUser?.username}? This will prevent them from logging in and using the system.`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialogs}>Cancel</Button>
-          <Button 
-            onClick={handleToggleBlock} 
+          <Button
+            onClick={handleToggleBlock}
             color={selectedUser?.isBlocked ? "success" : "error"}
             variant="contained"
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : (selectedUser?.isBlocked ? 'Unblock User' : 'Block User')}
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : selectedUser?.isBlocked ? (
+              "Unblock User"
+            ) : (
+              "Block User"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -555,12 +615,12 @@ const UsersManagement = () => {
         open={notification.open}
         autoHideDuration={6000}
         onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
+        <Alert
+          onClose={handleCloseNotification}
           severity={notification.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {notification.message}
         </Alert>
@@ -569,4 +629,4 @@ const UsersManagement = () => {
   );
 };
 
-export default UsersManagement; 
+export default UsersManagement;

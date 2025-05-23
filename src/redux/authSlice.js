@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // API base URL from environment or default to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://food-delivery-backend-gray.vercel.app/";
 
 // Create a thunk to sync bookmarks with the backend
 export const syncUserBookmarks = createAsyncThunk(
@@ -10,55 +12,78 @@ export const syncUserBookmarks = createAsyncThunk(
   async (_, { getState, rejectWithValue, dispatch }) => {
     try {
       const { user } = getState().auth;
-      
+
       if (!user || !user._id) {
         return rejectWithValue("User not authenticated");
       }
-      
+
       console.log("Fetching bookmarks for user:", user._id);
-      
+
       // First try: dedicated endpoint to get current user profile with bookmarks
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/v1/user/profile`, {
-          withCredentials: true,
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        const response = await axios.get(
+          `${API_BASE_URL}/api/v1/user/profile`,
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        });
-        
-        if (response.data.success && response.data.user && response.data.user.bookmarks) {
-          console.log("Successfully fetched user bookmarks:", response.data.user.bookmarks);
+        );
+
+        if (
+          response.data.success &&
+          response.data.user &&
+          response.data.user.bookmarks
+        ) {
+          console.log(
+            "Successfully fetched user bookmarks:",
+            response.data.user.bookmarks
+          );
           return response.data.user.bookmarks;
         }
       } catch (profileError) {
-        console.warn("Profile endpoint failed, trying bookmarked posts endpoint:", profileError.message);
+        console.warn(
+          "Profile endpoint failed, trying bookmarked posts endpoint:",
+          profileError.message
+        );
       }
-      
+
       // Second try: use bookmarked posts endpoint
       try {
-        const postsResponse = await axios.get(`${API_BASE_URL}/api/v1/post/bookmarked`, {
-          withCredentials: true,
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        const postsResponse = await axios.get(
+          `${API_BASE_URL}/api/v1/post/bookmarked`,
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        });
-        
-        if (postsResponse.data.success && Array.isArray(postsResponse.data.posts)) {
+        );
+
+        if (
+          postsResponse.data.success &&
+          Array.isArray(postsResponse.data.posts)
+        ) {
           // Extract post IDs from the response
-          const bookmarkIds = postsResponse.data.posts.map(post => post._id);
+          const bookmarkIds = postsResponse.data.posts.map((post) => post._id);
           console.log("Successfully fetched bookmarked posts:", bookmarkIds);
           return bookmarkIds;
         }
       } catch (postsError) {
         console.warn("Bookmarked posts endpoint failed:", postsError.message);
       }
-      
+
       // If both attempts fail, return current bookmarks (don't update but don't fail)
       console.warn("All bookmark sync attempts failed, keeping current state");
       return user.bookmarks || [];
     } catch (error) {
       console.error("Error syncing bookmarks:", error);
-      return rejectWithValue(error?.response?.data?.message || error.message || "Error syncing bookmarks");
+      return rejectWithValue(
+        error?.response?.data?.message ||
+          error.message ||
+          "Error syncing bookmarks"
+      );
     }
   }
 );
@@ -95,27 +120,29 @@ const authSlice = createSlice({
       if (state.user) {
         const postId = action.payload;
         console.log(`Updating bookmarks for post: ${postId}`);
-        
+
         // Ensure bookmarks is initialized as an array
         if (!state.user.bookmarks || !Array.isArray(state.user.bookmarks)) {
           state.user.bookmarks = [];
         }
-        
+
         const isCurrentlyBookmarked = state.user.bookmarks.includes(postId);
-        
+
         if (isCurrentlyBookmarked) {
           // Remove from bookmarks
           console.log(`Removing bookmark for post: ${postId}`);
-          state.user.bookmarks = state.user.bookmarks.filter(id => id !== postId);
+          state.user.bookmarks = state.user.bookmarks.filter(
+            (id) => id !== postId
+          );
         } else {
           // Add to bookmarks
           console.log(`Adding bookmark for post: ${postId}`);
           state.user.bookmarks.push(postId);
         }
-        
+
         // Record the timestamp of the last update
         state.lastBookmarkUpdate = Date.now();
-        
+
         // Log updated bookmarks
         console.log("Updated bookmarks:", state.user.bookmarks);
       } else {

@@ -7,16 +7,16 @@ const useGetAllMessage = () => {
   const [messagesLoaded, setMessagesLoaded] = useState(false);
   const dispatch = useDispatch();
   const { selectedUser } = useSelector((store) => store.auth);
-  
+
   useEffect(() => {
     const fetchAllMessage = async () => {
       if (!selectedUser?._id) return;
-      
+
       setMessagesLoaded(false);
-      
+
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/v1/message/all/${selectedUser._id}`,
+          `https://food-delivery-backend-gray.vercel.app//api/v1/message/all/${selectedUser._id}`,
           {
             withCredentials: true,
           }
@@ -29,10 +29,10 @@ const useGetAllMessage = () => {
         console.log(error);
       }
     };
-    
+
     fetchAllMessage();
   }, [selectedUser, dispatch]);
-  
+
   return { messagesLoaded };
 };
 

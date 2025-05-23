@@ -1,19 +1,19 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/";
 
 // Create axios instance with credentials
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10000
+  timeout: 10000,
 });
 
 // Normalize order data when receiving from API
 const normalizeOrder = (order) => {
   if (!order) return null;
-  
+
   return {
     ...order,
     // Ensure these fields always exist
@@ -21,39 +21,39 @@ const normalizeOrder = (order) => {
     subtotal: order.subtotal || 0,
     tax: order.tax || 0,
     deliveryFee: order.deliveryFee || 0,
-    status: order.status || 'processing',
-    paymentStatus: order.paymentStatus || 'pending',
-    items: Array.isArray(order.items) ? order.items : []
+    status: order.status || "processing",
+    paymentStatus: order.paymentStatus || "pending",
+    items: Array.isArray(order.items) ? order.items : [],
   };
 };
 
 // Action to fetch all orders (admin)
 export const fetchAllOrders = createAsyncThunk(
-  'admin/fetchAllOrders',
+  "admin/fetchAllOrders",
   async (params, { rejectWithValue }) => {
     try {
       const { page = 1, limit = 10, status, sortBy, sortOrder } = params || {};
-      
+
       let url = `/api/v1/orders/admin/all?page=${page}&limit=${limit}`;
-      
-      if (status && status !== 'all') {
+
+      if (status && status !== "all") {
         url += `&status=${status}`;
       }
-      
+
       if (sortBy) {
         url += `&sortBy=${sortBy}`;
       }
-      
+
       if (sortOrder) {
         url += `&sortOrder=${sortOrder}`;
       }
-      
+
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
       return rejectWithValue(
-        error.response?.data || { message: 'Failed to fetch orders' }
+        error.response?.data || { message: "Failed to fetch orders" }
       );
     }
   }
@@ -61,15 +61,15 @@ export const fetchAllOrders = createAsyncThunk(
 
 // Action to fetch order statistics
 export const fetchOrderStats = createAsyncThunk(
-  'admin/fetchOrderStats',
+  "admin/fetchOrderStats",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/api/v1/orders/admin/stats');
+      const response = await api.get("/api/v1/orders/admin/stats");
       return response.data;
     } catch (error) {
-      console.error('Error fetching order stats:', error);
+      console.error("Error fetching order stats:", error);
       return rejectWithValue(
-        error.response?.data || { message: 'Failed to fetch order statistics' }
+        error.response?.data || { message: "Failed to fetch order statistics" }
       );
     }
   }
@@ -77,19 +77,22 @@ export const fetchOrderStats = createAsyncThunk(
 
 // Action to update order status
 export const updateOrderStatus = createAsyncThunk(
-  'admin/updateOrderStatus',
-  async ({ orderId, status, paymentStatus, deliveryNotes }, { rejectWithValue }) => {
+  "admin/updateOrderStatus",
+  async (
+    { orderId, status, paymentStatus, deliveryNotes },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await api.put(`/api/v1/orders/admin/${orderId}/status`, {
         status,
         paymentStatus,
-        deliveryNotes
+        deliveryNotes,
       });
       return response.data;
     } catch (error) {
-      console.error('Error updating order status:', error);
+      console.error("Error updating order status:", error);
       return rejectWithValue(
-        error.response?.data || { message: 'Failed to update order status' }
+        error.response?.data || { message: "Failed to update order status" }
       );
     }
   }
@@ -97,15 +100,17 @@ export const updateOrderStatus = createAsyncThunk(
 
 // Action to fetch delivery status history
 export const fetchDeliveryStatusHistory = createAsyncThunk(
-  'admin/fetchDeliveryStatusHistory',
+  "admin/fetchDeliveryStatusHistory",
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/api/v1/orders/admin/${orderId}/status-history`);
+      const response = await api.get(
+        `/api/v1/orders/admin/${orderId}/status-history`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching status history:', error);
+      console.error("Error fetching status history:", error);
       return rejectWithValue(
-        error.response?.data || { message: 'Failed to fetch status history' }
+        error.response?.data || { message: "Failed to fetch status history" }
       );
     }
   }
@@ -113,24 +118,27 @@ export const fetchDeliveryStatusHistory = createAsyncThunk(
 
 // Action to assign a delivery agent
 export const assignDeliveryAgent = createAsyncThunk(
-  'admin/assignDeliveryAgent',
+  "admin/assignDeliveryAgent",
   async ({ orderId, agentId }, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/api/v1/orders/admin/${orderId}/assign-agent`, {
-        agentId
-      });
+      const response = await api.put(
+        `/api/v1/orders/admin/${orderId}/assign-agent`,
+        {
+          agentId,
+        }
+      );
       return response.data;
     } catch (error) {
-      console.error('Error assigning delivery agent:', error);
+      console.error("Error assigning delivery agent:", error);
       return rejectWithValue(
-        error.response?.data || { message: 'Failed to assign delivery agent' }
+        error.response?.data || { message: "Failed to assign delivery agent" }
       );
     }
   }
 );
 
 const adminSlice = createSlice({
-  name: 'admin',
+  name: "admin",
   initialState: {
     orders: {
       data: [],
@@ -140,153 +148,159 @@ const adminSlice = createSlice({
         currentPage: 1,
         limit: 10,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
       },
-      status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-      error: null
+      status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+      error: null,
     },
     stats: {
       data: null,
-      status: 'idle',
-      error: null
+      status: "idle",
+      error: null,
     },
     updateStatus: {
-      status: 'idle',
-      error: null
+      status: "idle",
+      error: null,
     },
     deliveryStatusHistory: {
       data: [],
-      status: 'idle',
-      error: null
+      status: "idle",
+      error: null,
     },
     assignAgent: {
-      status: 'idle',
-      error: null
-    }
+      status: "idle",
+      error: null,
+    },
   },
   reducers: {
     resetUpdateStatus: (state) => {
-      state.updateStatus.status = 'idle';
+      state.updateStatus.status = "idle";
       state.updateStatus.error = null;
     },
     resetAssignAgentStatus: (state) => {
-      state.assignAgent.status = 'idle';
+      state.assignAgent.status = "idle";
       state.assignAgent.error = null;
     },
     resetStatusHistory: (state) => {
       state.deliveryStatusHistory = {
         data: [],
-        status: 'idle',
-        error: null
+        status: "idle",
+        error: null,
       };
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
       // Handle fetchAllOrders
       .addCase(fetchAllOrders.pending, (state) => {
-        state.orders.status = 'loading';
+        state.orders.status = "loading";
       })
       .addCase(fetchAllOrders.fulfilled, (state, action) => {
-        state.orders.status = 'succeeded';
-        state.orders.data = action.payload.orders ? 
-          action.payload.orders.map(order => normalizeOrder(order)) : 
-          [];
+        state.orders.status = "succeeded";
+        state.orders.data = action.payload.orders
+          ? action.payload.orders.map((order) => normalizeOrder(order))
+          : [];
         state.orders.pagination = action.payload.pagination || {
           totalOrders: 0,
           totalPages: 0,
           currentPage: 1,
           limit: 10,
           hasNextPage: false,
-          hasPrevPage: false
+          hasPrevPage: false,
         };
         state.orders.error = null;
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
-        state.orders.status = 'failed';
-        state.orders.error = action.payload?.message || 'Failed to fetch orders';
+        state.orders.status = "failed";
+        state.orders.error =
+          action.payload?.message || "Failed to fetch orders";
       })
-      
+
       // Handle fetchOrderStats
       .addCase(fetchOrderStats.pending, (state) => {
-        state.stats.status = 'loading';
+        state.stats.status = "loading";
       })
       .addCase(fetchOrderStats.fulfilled, (state, action) => {
-        state.stats.status = 'succeeded';
+        state.stats.status = "succeeded";
         state.stats.data = action.payload.stats;
         state.stats.error = null;
       })
       .addCase(fetchOrderStats.rejected, (state, action) => {
-        state.stats.status = 'failed';
-        state.stats.error = action.payload?.message || 'Failed to fetch statistics';
+        state.stats.status = "failed";
+        state.stats.error =
+          action.payload?.message || "Failed to fetch statistics";
       })
-      
+
       // Handle updateOrderStatus
       .addCase(updateOrderStatus.pending, (state) => {
-        state.updateStatus.status = 'loading';
+        state.updateStatus.status = "loading";
       })
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        state.updateStatus.status = 'succeeded';
+        state.updateStatus.status = "succeeded";
         state.updateStatus.error = null;
-        
+
         // Update the order in the orders list
         if (action.payload && action.payload.order) {
           const updatedOrder = normalizeOrder(action.payload.order);
           const orderIndex = state.orders.data.findIndex(
             (order) => order._id === updatedOrder._id
           );
-          
+
           if (orderIndex !== -1) {
             state.orders.data[orderIndex] = updatedOrder;
           }
         }
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
-        state.updateStatus.status = 'failed';
-        state.updateStatus.error = action.payload?.message || 'Failed to update order';
+        state.updateStatus.status = "failed";
+        state.updateStatus.error =
+          action.payload?.message || "Failed to update order";
       })
-      
+
       // Handle fetchDeliveryStatusHistory
       .addCase(fetchDeliveryStatusHistory.pending, (state) => {
-        state.deliveryStatusHistory.status = 'loading';
+        state.deliveryStatusHistory.status = "loading";
       })
       .addCase(fetchDeliveryStatusHistory.fulfilled, (state, action) => {
-        state.deliveryStatusHistory.status = 'succeeded';
+        state.deliveryStatusHistory.status = "succeeded";
         state.deliveryStatusHistory.data = action.payload.statusHistory;
         state.deliveryStatusHistory.error = null;
       })
       .addCase(fetchDeliveryStatusHistory.rejected, (state, action) => {
-        state.deliveryStatusHistory.status = 'failed';
-        state.deliveryStatusHistory.error = action.payload?.message || 'Failed to fetch status history';
+        state.deliveryStatusHistory.status = "failed";
+        state.deliveryStatusHistory.error =
+          action.payload?.message || "Failed to fetch status history";
       })
-      
+
       // Handle assignDeliveryAgent
       .addCase(assignDeliveryAgent.pending, (state) => {
-        state.assignAgent.status = 'loading';
+        state.assignAgent.status = "loading";
       })
       .addCase(assignDeliveryAgent.fulfilled, (state, action) => {
-        state.assignAgent.status = 'succeeded';
+        state.assignAgent.status = "succeeded";
         state.assignAgent.error = null;
-        
+
         // Update the order in the orders list
         if (action.payload && action.payload.order) {
           const updatedOrder = normalizeOrder(action.payload.order);
           const orderIndex = state.orders.data.findIndex(
             (order) => order._id === updatedOrder._id
           );
-          
+
           if (orderIndex !== -1) {
             state.orders.data[orderIndex] = updatedOrder;
           }
         }
       })
       .addCase(assignDeliveryAgent.rejected, (state, action) => {
-        state.assignAgent.status = 'failed';
-        state.assignAgent.error = action.payload?.message || 'Failed to assign delivery agent';
+        state.assignAgent.status = "failed";
+        state.assignAgent.error =
+          action.payload?.message || "Failed to assign delivery agent";
       });
-  }
+  },
 });
 
-export const { resetUpdateStatus, resetAssignAgentStatus, resetStatusHistory } = adminSlice.actions;
+export const { resetUpdateStatus, resetAssignAgentStatus, resetStatusHistory } =
+  adminSlice.actions;
 
-export default adminSlice.reducer; 
+export default adminSlice.reducer;

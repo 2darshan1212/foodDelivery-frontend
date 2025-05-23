@@ -7,63 +7,60 @@ import { Loader, Loader2 } from "lucide-react";
 import { setAuthUser } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
 
-
 const Login = () => {
   const [input, setInput] = useState({
-   
     email: "",
     password: "",
   });
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const dispatch=useDispatch();
+  const dispatch = useDispatch();
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
-  const signupHandler=async(e)=>{
+  const signupHandler = async (e) => {
     e.preventDefault();
-    try{
-      setLoading(true)
-        const res = await axios.post(
-          "http://localhost:8000/api/v1/user/login",
-          input,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log(res.data);
-        if(res.data.success){
-          const userData = {
-            ...res.data.user,
-            isAdmin: res.data.user.isAdmin || false
-          };
-          
-          dispatch(setAuthUser(userData));
-          
-          if (userData.isAdmin && window.location.pathname.includes('/admin')) {
-            navigate('/admin/dashboard');
-          } else {
-            navigate("/");
-          }
-          
-          toast.success(res.data.message)
-          setInput({
-            email:"",
-            password:""
-          })
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "https://food-delivery-backend-gray.vercel.app//api/v1/user/login",
+        input,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
-    }catch(error){
-        console.log(error)
-        toast.error(error.response.data.message);
-    }finally{
+      );
+      console.log(res.data);
+      if (res.data.success) {
+        const userData = {
+          ...res.data.user,
+          isAdmin: res.data.user.isAdmin || false,
+        };
+
+        dispatch(setAuthUser(userData));
+
+        if (userData.isAdmin && window.location.pathname.includes("/admin")) {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
+
+        toast.success(res.data.message);
+        setInput({
+          email: "",
+          password: "",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
       setLoading(false);
     }
-    
-  }
+  };
 
   return (
     <div className="flex items-center w-screen h-screen justify-center">
@@ -96,16 +93,14 @@ const Login = () => {
             className="focus-visible:ring-transparent mx-2"
           />
         </div>
-        {
-            loading ? (
-                <Button >
-                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                </Button>
-            ) : (
-                <Button type="submit">Login</Button>
-            )
-        }
-        
+        {loading ? (
+          <Button>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          </Button>
+        ) : (
+          <Button type="submit">Login</Button>
+        )}
+
         <div className="text-center">
           Doesn't have an account?{" "}
           <Link to="/signup" className="text-blue-600">

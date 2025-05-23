@@ -53,17 +53,17 @@ const Profile = () => {
   const updateLocation = async () => {
     try {
       setIsLoadingLocation(true);
-      
+
       if (!location.longitude || !location.latitude) {
         toast.error("Invalid location coordinates");
         setIsLoadingLocation(false);
         return;
       }
-      
+
       console.log("Sending location update:", location);
-      
+
       const res = await axios.post(
-        "http://localhost:8000/api/v1/user/location",
+        "https://food-delivery-backend-gray.vercel.app//api/v1/user/location",
         location,
         {
           headers: {
@@ -76,15 +76,18 @@ const Profile = () => {
       if (res.data.success) {
         console.log("Location update response:", res.data);
         toast.success("Location updated successfully");
-        
+
         // Update user in Redux store with new location
         if (res.data.user) {
           dispatch(setAuthUser(res.data.user));
         } else {
           // If user data not returned, fetch user data
-          const userRes = await axios.get("http://localhost:8000/api/v1/user/profile", {
-            withCredentials: true
-          });
+          const userRes = await axios.get(
+            "https://food-delivery-backend-gray.vercel.app//api/v1/user/profile",
+            {
+              withCredentials: true,
+            }
+          );
           if (userRes.data.success) {
             dispatch(setAuthUser(userRes.data.user));
           }
@@ -101,7 +104,7 @@ const Profile = () => {
   const findNearbyUsers = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/v1/user/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/user/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
         {
           withCredentials: true,
         }
@@ -119,7 +122,7 @@ const Profile = () => {
   const findNearbyPosts = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/v1/post/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
+        `https://food-delivery-backend-gray.vercel.app//api/v1/post/nearby?longitude=${location.longitude}&latitude=${location.latitude}`,
         {
           withCredentials: true,
         }
@@ -148,33 +151,38 @@ const Profile = () => {
           {/* Center Content */}
           <div className="flex-1 flex flex-col">
             <ProfilePage userProfile={userProfile} />
-            
+
             {/* Location Update Section */}
             <div className="bg-white p-4 rounded-lg shadow-sm mt-4">
               <h2 className="text-lg font-semibold mb-2">Your Location</h2>
-              
+
               <div className="flex flex-col gap-2 mb-3">
                 <p>
                   <span className="font-medium">Current Coordinates:</span>{" "}
-                  {user?.location?.coordinates ? 
-                    `${user.location.coordinates[0].toFixed(6)}, ${user.location.coordinates[1].toFixed(6)}` : 
-                    "No location set"}
+                  {user?.location?.coordinates
+                    ? `${user.location.coordinates[0].toFixed(
+                        6
+                      )}, ${user.location.coordinates[1].toFixed(6)}`
+                    : "No location set"}
                 </p>
-                
+
                 <p className="text-sm text-gray-500">
-                  Setting your location helps show accurate distances to food vendors
+                  Setting your location helps show accurate distances to food
+                  vendors
                 </p>
               </div>
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={getCurrentLocation}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                   disabled={isLoadingLocation}
                 >
-                  {isLoadingLocation ? "Getting Location..." : "Get Current Location"}
+                  {isLoadingLocation
+                    ? "Getting Location..."
+                    : "Get Current Location"}
                 </button>
-                
+
                 <button
                   onClick={updateLocation}
                   className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
@@ -186,7 +194,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Left Sidebar fixed at bottom on mobile */}
         <div className="fixed bottom-0 left-0 right-0 block md:hidden p-2 shadow-t bg-white border-t">
           <Leftsidebar />

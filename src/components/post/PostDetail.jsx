@@ -1,19 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { CircularProgress, Box, IconButton, Button, Divider, Paper, Rating, Typography, LinearProgress, Accordion, AccordionSummary, AccordionDetails, Alert } from '@mui/material';
-import { ArrowLeft, MessageCircle, Heart, Star, Shield, ChevronDown } from 'lucide-react';
-import PostCard from './PostCard';
-import { setSelectedPost } from '../../redux/postSlice';
-import CommentDialog from '../comment/CommentDialog';
-import RecipeIPRegistration from '../story/RecipeIPRegistration';
-import RecipeIPDetails from '../story/RecipeIPDetails';
-import { useStoryProtocol } from '../../providers/StoryProtocolProvider';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { toast } from "react-toastify";
+import {
+  CircularProgress,
+  Box,
+  IconButton,
+  Button,
+  Divider,
+  Paper,
+  Rating,
+  Typography,
+  LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Alert,
+} from "@mui/material";
+import {
+  ArrowLeft,
+  MessageCircle,
+  Heart,
+  Star,
+  Shield,
+  ChevronDown,
+} from "lucide-react";
+import PostCard from "./PostCard";
+import { setSelectedPost } from "../../redux/postSlice";
+import CommentDialog from "../comment/CommentDialog";
+import RecipeIPRegistration from "../story/RecipeIPRegistration";
+import RecipeIPDetails from "../story/RecipeIPDetails";
+import { useStoryProtocol } from "../../providers/StoryProtocolProvider";
 
 // API base URL from environment or default to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://food-delivery-backend-gray.vercel.app/";
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -28,10 +51,10 @@ const PostDetail = () => {
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const { user } = useSelector((store) => store.auth);
   const { isInitialized } = useStoryProtocol();
-  
+
   // Check if post exists in Redux store
   const { posts } = useSelector((store) => store.post);
-  const postInRedux = posts.find(p => p._id === id);
+  const postInRedux = posts.find((p) => p._id === id);
 
   console.log(`Post detail - ID: ${id}, Found in Redux: ${!!postInRedux}`);
 
@@ -47,60 +70,63 @@ const PostDetail = () => {
   // Fetch post data from API regardless of Redux state
   useEffect(() => {
     const fetchPost = async () => {
-      if (!id || id.trim() === '') {
-        setError('Post ID is missing');
-        toast.error('Post ID is missing');
+      if (!id || id.trim() === "") {
+        setError("Post ID is missing");
+        toast.error("Post ID is missing");
         setLoading(false);
         return;
       }
-      
+
       try {
         console.log(`Fetching post data for ID: ${id}`);
         setLoading(!post); // Only show loading if we don't have the post yet
-        
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/post/${id}`, 
-          { withCredentials: true }
-        );
-        
+
+        const response = await axios.get(`${API_BASE_URL}/api/v1/post/${id}`, {
+          withCredentials: true,
+        });
+
         console.log("API response:", response.data);
-        
+
         if (response.data.success) {
           if (response.data.post) {
-            console.log('Post data structure:', response.data.post);
-            console.log('User data:', user);
+            console.log("Post data structure:", response.data.post);
+            console.log("User data:", user);
             setPost(response.data.post);
             // Update Redux with the latest post data
             dispatch(setSelectedPost(response.data.post));
           } else {
-            setError('Post data is missing');
-            toast.error('Post data is missing');
+            setError("Post data is missing");
+            toast.error("Post data is missing");
           }
         } else {
-          setError(response.data.message || 'Post not found');
-          toast.error(response.data.message || 'Post not found');
+          setError(response.data.message || "Post not found");
+          toast.error(response.data.message || "Post not found");
         }
       } catch (err) {
         console.error("Error fetching post:", err);
         // Extract error message from response if available
-        let errorMessage = 'Error fetching post';
-        
+        let errorMessage = "Error fetching post";
+
         if (err.response) {
           // The request was made and the server responded with an error status
           errorMessage = err.response.data?.message || errorMessage;
-          console.log(`Server returned error status ${err.response.status}: ${errorMessage}`);
-          
+          console.log(
+            `Server returned error status ${err.response.status}: ${errorMessage}`
+          );
+
           // If it's a "Post not found" or "Invalid post ID" error, display a more user-friendly message
-          if (err.response.status === 404 || 
-             (err.response.status === 400 && errorMessage.includes('ID'))) {
-            errorMessage = 'This post does not exist or has been removed';
+          if (
+            err.response.status === 404 ||
+            (err.response.status === 400 && errorMessage.includes("ID"))
+          ) {
+            errorMessage = "This post does not exist or has been removed";
           }
         } else if (err.request) {
           // The request was made but no response was received
-          console.log('No response received from server');
-          errorMessage = 'Unable to connect to server';
+          console.log("No response received from server");
+          errorMessage = "Unable to connect to server";
         }
-        
+
         setError(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -111,10 +137,10 @@ const PostDetail = () => {
     if (id) {
       fetchPost();
     } else {
-      setError('Post ID is required');
+      setError("Post ID is required");
       setLoading(false);
     }
-    
+
     // Return cleanup function
     return () => {
       // Cleanup
@@ -125,14 +151,14 @@ const PostDetail = () => {
   useEffect(() => {
     const fetchRatings = async () => {
       if (!post || !id) return;
-      
+
       setLoadingRatings(true);
       try {
         const response = await axios.get(
           `${API_BASE_URL}/api/v1/post/${id}/ratings`,
           { withCredentials: true }
         );
-        
+
         if (response.data.success) {
           setRatings(response.data.ratings);
         }
@@ -142,7 +168,7 @@ const PostDetail = () => {
         setLoadingRatings(false);
       }
     };
-    
+
     fetchRatings();
   }, [id, post]);
 
@@ -171,7 +197,11 @@ const PostDetail = () => {
 
     if (!ratings) {
       return (
-        <Typography color="text.secondary" variant="body2" sx={{ py: 2, textAlign: "center" }}>
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          sx={{ py: 2, textAlign: "center" }}
+        >
           No ratings information available
         </Typography>
       );
@@ -181,31 +211,50 @@ const PostDetail = () => {
       <Box>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Box sx={{ textAlign: "center", mr: 3 }}>
-            <Typography variant="h3" component="div" sx={{ fontWeight: "bold", color: "primary.main" }}>
+            <Typography
+              variant="h3"
+              component="div"
+              sx={{ fontWeight: "bold", color: "primary.main" }}
+            >
               {ratings.average ? ratings.average.toFixed(1) : "0.0"}
             </Typography>
-            <Rating value={ratings.average || 0} precision={0.5} readOnly size="medium" />
+            <Rating
+              value={ratings.average || 0}
+              precision={0.5}
+              readOnly
+              size="medium"
+            />
             <Typography variant="body2" color="text.secondary">
               {ratings.count || 0} {ratings.count === 1 ? "rating" : "ratings"}
             </Typography>
           </Box>
           <Box sx={{ flexGrow: 1 }}>
             {[5, 4, 3, 2, 1].map((star) => (
-              <Box key={star} sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+              <Box
+                key={star}
+                sx={{ display: "flex", alignItems: "center", mb: 0.5 }}
+              >
                 <Typography variant="body2" sx={{ minWidth: "20px", mr: 1 }}>
                   {star}
                 </Typography>
                 <Box sx={{ width: "100%", mr: 1 }}>
                   <LinearProgress
                     variant="determinate"
-                    value={calculatePercentage(ratings.distribution?.[star] || 0)}
-                    sx={{ 
-                      height: 8, 
+                    value={calculatePercentage(
+                      ratings.distribution?.[star] || 0
+                    )}
+                    sx={{
+                      height: 8,
                       borderRadius: 1,
-                      backgroundColor: 'grey.300',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: star > 3 ? 'success.main' : star > 1 ? 'warning.main' : 'error.main',
-                      }
+                      backgroundColor: "grey.300",
+                      "& .MuiLinearProgress-bar": {
+                        backgroundColor:
+                          star > 3
+                            ? "success.main"
+                            : star > 1
+                            ? "warning.main"
+                            : "error.main",
+                      },
                     }}
                   />
                 </Box>
@@ -250,7 +299,7 @@ const PostDetail = () => {
         </IconButton>
         <h1 className="text-xl font-semibold ml-2">Post Details</h1>
       </div>
-      
+
       {loading ? (
         <Box className="flex justify-center py-8">
           <CircularProgress />
@@ -258,9 +307,9 @@ const PostDetail = () => {
       ) : error && !post ? (
         <div className="p-4 bg-red-50 text-red-600 rounded-md">
           {error}
-          <Button 
-            variant="text" 
-            color="primary" 
+          <Button
+            variant="text"
+            color="primary"
             onClick={() => navigate(-1)}
             className="mt-2"
           >
@@ -270,18 +319,33 @@ const PostDetail = () => {
       ) : post ? (
         <>
           <PostCard post={post} />
-          
+
           {/* Ratings Summary Section */}
           <Paper elevation={1} sx={{ p: 3, mt: 3, borderRadius: 2 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" component="h2" sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                component="h2"
+                sx={{ display: "flex", alignItems: "center" }}
+              >
                 <Star size={20} className="mr-2" /> Ratings & Reviews
               </Typography>
-              <Button 
-                variant="contained" 
-                color="primary" 
+              <Button
+                variant="contained"
+                color="primary"
                 size="small"
-                onClick={() => document.querySelector(`button[data-post-id="${post._id}"]`)?.click()}
+                onClick={() =>
+                  document
+                    .querySelector(`button[data-post-id="${post._id}"]`)
+                    ?.click()
+                }
               >
                 {ratings?.userRating ? "Update Your Rating" : "Rate This Food"}
               </Button>
@@ -289,35 +353,51 @@ const PostDetail = () => {
             <Divider sx={{ mb: 2 }} />
             {renderRatingsSummary()}
           </Paper>
-          
+
           {/* Intellectual Property (IP) Section */}
           {user && (
             <Paper elevation={1} sx={{ p: 3, mt: 3, borderRadius: 2 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="h6" component="h2" sx={{ display: "flex", alignItems: "center" }}>
-                  <Shield size={20} className="mr-2" /> Intellectual Property Rights
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
+                  <Shield size={20} className="mr-2" /> Intellectual Property
+                  Rights
                 </Typography>
-                
+
                 {/* Show registration button for post owners */}
-                {post.author?._id === user?._id && !registrationComplete && !post.ipRegistered && (
-                  <RecipeIPRegistration 
-                    recipeData={{
-                      id: post._id,
-                      title: post.caption,
-                      description: post.caption,
-                      image: post.image,
-                      category: post.category || 'Recipe',
-                      chef: post.author?.username,
-                      prepTime: post.preparationTime || '30 mins',
-                      cuisine: post.cuisine || 'International'
-                    }}
-                    onRegistrationComplete={() => setRegistrationComplete(true)}
-                  />
-                )}
+                {post.author?._id === user?._id &&
+                  !registrationComplete &&
+                  !post.ipRegistered && (
+                    <RecipeIPRegistration
+                      recipeData={{
+                        id: post._id,
+                        title: post.caption,
+                        description: post.caption,
+                        image: post.image,
+                        category: post.category || "Recipe",
+                        chef: post.author?.username,
+                        prepTime: post.preparationTime || "30 mins",
+                        cuisine: post.cuisine || "International",
+                      }}
+                      onRegistrationComplete={() =>
+                        setRegistrationComplete(true)
+                      }
+                    />
+                  )}
               </Box>
-              
+
               <Divider sx={{ mb: 2 }} />
-              
+
               {post.ipRegistered || registrationComplete ? (
                 <Accordion defaultExpanded>
                   <AccordionSummary expandIcon={<ChevronDown />}>
@@ -333,24 +413,28 @@ const PostDetail = () => {
                 <Box>
                   {post.author?._id === user?._id ? (
                     <Alert severity="info" sx={{ mb: 2 }}>
-                      You can register this recipe as intellectual property to protect your creation.
-                      Complete the registration to establish ownership and set licensing terms.
+                      You can register this recipe as intellectual property to
+                      protect your creation. Complete the registration to
+                      establish ownership and set licensing terms.
                     </Alert>
                   ) : (
                     <Alert severity="info" sx={{ mb: 2 }}>
-                      This recipe has not been registered for intellectual property protection yet.
+                      This recipe has not been registered for intellectual
+                      property protection yet.
                     </Alert>
                   )}
-                  
+
                   <Box sx={{ mt: 3 }}>
                     <Typography variant="subtitle2" gutterBottom>
                       What is IP protection for recipes?
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Registering a recipe with Story Protocol establishes ownership rights and allows
-                      creators to set licensing terms for commercial use, derivatives, and attribution
-                      requirements. This can help protect unique recipe creations and potentially earn
-                      royalties when others use them commercially.
+                      Registering a recipe with Story Protocol establishes
+                      ownership rights and allows creators to set licensing
+                      terms for commercial use, derivatives, and attribution
+                      requirements. This can help protect unique recipe
+                      creations and potentially earn royalties when others use
+                      them commercially.
                     </Typography>
                   </Box>
                 </Box>
@@ -363,15 +447,15 @@ const PostDetail = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Engagement</h2>
               <div className="flex gap-2">
-                <Button 
-                  variant="outlined" 
+                <Button
+                  variant="outlined"
                   startIcon={<Heart size={16} />}
                   color="error"
                 >
                   {post.likes?.length || 0} Likes
                 </Button>
-                <Button 
-                  variant="outlined" 
+                <Button
+                  variant="outlined"
                   startIcon={<MessageCircle size={16} />}
                   onClick={openComments}
                   color="primary"
@@ -380,22 +464,26 @@ const PostDetail = () => {
                 </Button>
               </div>
             </div>
-            
+
             <Divider className="my-3" />
-            
+
             <div className="mt-4">
               <h3 className="font-medium mb-2">Recent Activity</h3>
               {post.likes && post.likes.length > 0 ? (
                 <p>
-                  Liked by {post.likes.length} {post.likes.length === 1 ? 'person' : 'people'}
+                  Liked by {post.likes.length}{" "}
+                  {post.likes.length === 1 ? "person" : "people"}
                 </p>
               ) : (
                 <p className="text-gray-500">No likes yet</p>
               )}
-              
+
               {post.comments && post.comments.length > 0 ? (
                 <div className="mt-2">
-                  <p className="cursor-pointer text-blue-500 hover:underline" onClick={openComments}>
+                  <p
+                    className="cursor-pointer text-blue-500 hover:underline"
+                    onClick={openComments}
+                  >
                     View all {post.comments.length} comments
                   </p>
                 </div>
@@ -406,9 +494,7 @@ const PostDetail = () => {
           </div>
         </>
       ) : (
-        <div className="p-4 bg-gray-100 rounded-md">
-          Post not found
-        </div>
+        <div className="p-4 bg-gray-100 rounded-md">Post not found</div>
       )}
 
       <CommentDialog
@@ -420,4 +506,4 @@ const PostDetail = () => {
   );
 };
 
-export default PostDetail; 
+export default PostDetail;

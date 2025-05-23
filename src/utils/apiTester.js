@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = "https://food-delivery-backend-gray.vercel.app/";
 
 /**
  * Test the backend API connectivity
@@ -8,19 +8,21 @@ const API_BASE_URL = 'http://localhost:8000';
  */
 export const testApiConnection = async () => {
   try {
-    console.log('Testing API connection to:', `${API_BASE_URL}/api/health`);
-    const response = await axios.get(`${API_BASE_URL}/api/health`, { timeout: 5000 });
-    console.log('API health check response:', response.data);
+    console.log("Testing API connection to:", `${API_BASE_URL}/api/health`);
+    const response = await axios.get(`${API_BASE_URL}/api/health`, {
+      timeout: 5000,
+    });
+    console.log("API health check response:", response.data);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
-    console.error('API connection test failed:', error.message);
+    console.error("API connection test failed:", error.message);
     return {
       success: false,
       error: error.message,
-      details: error.response?.data || 'No response data'
+      details: error.response?.data || "No response data",
     };
   }
 };
@@ -33,23 +35,23 @@ export const testApiConnection = async () => {
 export const testEndpoint = async (endpoint) => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('Testing endpoint:', url);
-    const response = await axios.get(url, { 
+    console.log("Testing endpoint:", url);
+    const response = await axios.get(url, {
       withCredentials: true,
-      timeout: 5000
+      timeout: 5000,
     });
-    console.log('Endpoint test response:', response.data);
+    console.log("Endpoint test response:", response.data);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
-    console.error('Endpoint test failed:', error.message);
+    console.error("Endpoint test failed:", error.message);
     return {
       success: false,
       error: error.message,
-      details: error.response?.data || 'No response data',
-      status: error.response?.status
+      details: error.response?.data || "No response data",
+      status: error.response?.status,
     };
   }
-}; 
+};

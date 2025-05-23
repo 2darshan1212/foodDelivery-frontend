@@ -23,8 +23,14 @@ const Login = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      
+      // Use the correct URL based on environment (just like our axiosInstance)
+      const baseURL = process.env.NODE_ENV === 'production'
+        ? "https://food-delivery-backend-gray.vercel.app/api/v1"
+        : "http://localhost:3000/api/v1";
+      
       const res = await axios.post(
-        "https://food-delivery-backend-gray.vercel.app/api/v1/user/login",
+        `${baseURL}/user/login`,
         input,
         {
           headers: {
@@ -33,13 +39,22 @@ const Login = () => {
           withCredentials: true,
         }
       );
-      console.log(res.data);
+      
+      console.log('Login response:', res.data);
+      
       if (res.data.success) {
         const userData = {
           ...res.data.user,
           isAdmin: res.data.user.isAdmin || false,
         };
-
+        
+        // Store the token in localStorage for the Authorization header fallback
+        // This will be used by our axiosInstance when cookies fail
+        if (res.data.token) {
+          localStorage.setItem('authToken', res.data.token);
+          console.log('Auth token saved to localStorage for API requests');
+        }
+        
         dispatch(setAuthUser(userData));
 
         if (userData.isAdmin && window.location.pathname.includes("/admin")) {

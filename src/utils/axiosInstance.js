@@ -13,10 +13,18 @@ const instance = axios.create({
   timeout: 15000, // 15 second timeout
 });
 
-// Add request debugging
+// Add request debugging and authentication token handling
 instance.interceptors.request.use(
   (config) => {
     console.log(`Making ${config.method.toUpperCase()} request to: ${config.url}`);
+    
+    // Check for auth token in localStorage and add it to headers if it exists
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+      console.log('Using Authorization header with Bearer token');
+    }
+    
     return config;
   },
   (error) => {

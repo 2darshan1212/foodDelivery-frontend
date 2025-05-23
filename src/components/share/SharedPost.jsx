@@ -18,7 +18,7 @@ import PostCard from "../post/PostCard";
 // API base URL from environment or default to localhost
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://food-delivery-backend-gray.vercel.app/api/";
+  "https://food-delivery-backend-gray.vercel.app";
 
 const SharedPost = () => {
   const { shareId } = useParams();

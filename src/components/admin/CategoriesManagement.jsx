@@ -220,7 +220,7 @@ const CategoriesManagement = () => {
       setLoading(true);
 
       await axios.delete(
-        `https://food-delivery-backend-gray.vercel.app/api/api/v1/category/${selectedCategory._id}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/category/${selectedCategory._id}`,
         {
           withCredentials: true,
         }

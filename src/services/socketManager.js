@@ -28,7 +28,7 @@ export const initSocket = (userId) => {
   if (socket) return socket;
 
   try {
-    socket = io("https://food-delivery-backend-gray.vercel.app/api/", {
+    socket = io("https://food-delivery-backend-gray.vercel.app", {
       query: {
         userId,
       },

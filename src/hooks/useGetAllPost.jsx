@@ -9,7 +9,7 @@ const useGetAllPost = () => {
     const fetchAllPost = async () => {
       try {
         const res = await axios.get(
-          "https://food-delivery-backend-gray.vercel.app/api/api/v1/post/all",
+          "https://food-delivery-backend-gray.vercel.app/api/v1/post/all",
           {
             withCredentials: true,
           }

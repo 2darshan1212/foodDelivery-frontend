@@ -176,7 +176,7 @@ const ChatPage = () => {
       console.log("Sending message to:", receiverId);
 
       const res = await axios.post(
-        `https://food-delivery-backend-gray.vercel.app/api/api/v1/message/send/${receiverId}`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/message/send/${receiverId}`,
         formData,
         {
           headers: {

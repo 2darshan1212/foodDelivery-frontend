@@ -48,7 +48,7 @@ const CommentDialog = ({ open, setOpen, post }) => {
     if (!text.trim()) return;
     try {
       const res = await axios.post(
-        `https://food-delivery-backend-gray.vercel.app/api/api/v1/post/${selectedPost?._id}/comment`,
+        `https://food-delivery-backend-gray.vercel.app/api/v1/post/${selectedPost?._id}/comment`,
         { text, parentId },
         {
           headers: {

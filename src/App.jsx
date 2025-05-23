@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import SolanaWalletProvider from "./components/wallet/SolanaWalletProvider";
 import StoryProtocolProvider from "./providers/StoryProtocolProvider";
 import { SocketProvider } from "./context/SocketContext.jsx";
-import Signup from "./components/auth/Signup";
+import Signup from "./components/Auth/Signup";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./components/mainlayout/MainLayout";
-import Login from "./components/auth/Login";
+import Login from "./components/Auth/Login";
 import Feeds from "./components/feeds/Feeds";
 import Profile from "./components/profile/Profile";
 import EditProfile from "./components/editProfile/EditProfile";
@@ -16,15 +16,24 @@ import ChatPage from "./components/chat/ChatPage";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { addNotification, fetchNotifications } from "./redux/rtnSlice";
-import { setSocketConnected, resetSocketState, addOrderStatusUpdate } from "./redux/socketSlice";
+import {
+  setSocketConnected,
+  resetSocketState,
+  addOrderStatusUpdate,
+} from "./redux/socketSlice";
 import { fetchCurrentUserFollowings } from "./redux/userSlice";
-import { setCurrentUser, migrateCart, syncOrderStatus, fetchOrders } from "./redux/cartSlice";
-import { 
-  initSocket, 
-  closeSocket, 
-  onEvent, 
+import {
+  setCurrentUser,
+  migrateCart,
+  syncOrderStatus,
+  fetchOrders,
+} from "./redux/cartSlice";
+import {
+  initSocket,
+  closeSocket,
+  onEvent,
   offEvent,
-  getSocket
+  getSocket,
 } from "./services/socketManager";
 import PostDetail from "./components/post/PostDetail";
 import FavoritesPage from "./components/favorites/FavoritesPage";
@@ -179,171 +188,189 @@ const browserRouter = createBrowserRouter([
 const App = () => {
   const { user } = useSelector((store) => store.auth);
   const { connected } = useSelector((store) => store.socket);
-  const { unreadCounts } = useSelector((store) => store.chat); 
+  const { unreadCounts } = useSelector((store) => store.chat);
   const dispatch = useDispatch();
-  
+
   // Initialize user-specific cart when user logs in or out
   useEffect(() => {
     // Set current user ID for cart (or null if logged out)
     const userId = user?._id || null;
     console.log("Setting current user ID in cart state:", userId);
     dispatch(setCurrentUser(userId));
-    
+
     // If user is logged in, migrate any existing cart items to their user-specific cart
     if (userId) {
       dispatch(migrateCart(userId));
-      
+
       // Force fetch orders when user changes (clear any previous user's orders)
-      dispatch({ type: 'cart/orders/reset' });
+      dispatch({ type: "cart/orders/reset" });
       dispatch(fetchOrders());
     } else {
       // Clear orders when user logs out
-      dispatch({ type: 'cart/orders/reset' });
+      dispatch({ type: "cart/orders/reset" });
     }
   }, [user?._id, dispatch]);
-  
+
   // Detect and fix corrupted chat state
   useEffect(() => {
     // Check if unreadCounts is undefined, which indicates a corrupted state
     if (unreadCounts === undefined) {
-      console.warn('Found corrupted chat state, attempting to fix...');
-      
+      console.warn("Found corrupted chat state, attempting to fix...");
+
       // Try to repair the localStorage data
       try {
         // Get the current persisted state
-        const persistedState = JSON.parse(localStorage.getItem('persist:chat'));
+        const persistedState = JSON.parse(localStorage.getItem("persist:chat"));
         if (persistedState) {
           // Ensure unreadCounts exists in the state
           const chatState = JSON.parse(persistedState);
           if (!chatState.unreadCounts) {
             chatState.unreadCounts = {};
             persistedState.chat = JSON.stringify(chatState);
-            localStorage.setItem('persist:chat', JSON.stringify(persistedState));
-            console.log('Fixed corrupted chat state');
-            
+            localStorage.setItem(
+              "persist:chat",
+              JSON.stringify(persistedState)
+            );
+            console.log("Fixed corrupted chat state");
+
             // Force a page reload to apply the fixed state
             window.location.reload();
           }
         }
       } catch (error) {
-        console.error('Error fixing corrupted state, clearing chat state:', error);
+        console.error(
+          "Error fixing corrupted state, clearing chat state:",
+          error
+        );
         // If unable to repair, clear the chat state completely
-        localStorage.removeItem('persist:chat');
+        localStorage.removeItem("persist:chat");
         window.location.reload();
       }
     }
   }, [unreadCounts]);
-  
+
   // Fetch notifications when user is logged in
   useEffect(() => {
     if (user) {
       dispatch(fetchNotifications());
     }
   }, [user, dispatch]);
-  
+
   // Fetch user followings when logged in
   useEffect(() => {
     if (user) {
       dispatch(fetchCurrentUserFollowings());
     }
   }, [user, dispatch]);
-  
+
   // Setup socket connection
   useEffect(() => {
     if (user) {
       try {
         const socket = initSocket(user._id);
-        
+
         if (socket) {
           // Set socket connection status in Redux
-          dispatch(setSocketConnected({
-            connected: socket.connected,
-            socketId: socket.id
-          }));
-          
+          dispatch(
+            setSocketConnected({
+              connected: socket.connected,
+              socketId: socket.id,
+            })
+          );
+
           // Update connection status when it changes
-          onEvent('connect', () => {
-            console.log('Socket connected');
-            dispatch(setSocketConnected({
-              connected: true,
-              socketId: socket.id
-            }));
-            
+          onEvent("connect", () => {
+            console.log("Socket connected");
+            dispatch(
+              setSocketConnected({
+                connected: true,
+                socketId: socket.id,
+              })
+            );
+
             // When reconnected, refresh notifications
             dispatch(fetchNotifications());
           });
-          
-          onEvent('disconnect', () => {
-            console.log('Socket disconnected');
-            dispatch(setSocketConnected({
-              connected: false,
-              socketId: null
-            }));
+
+          onEvent("disconnect", () => {
+            console.log("Socket disconnected");
+            dispatch(
+              setSocketConnected({
+                connected: false,
+                socketId: null,
+              })
+            );
           });
-          
+
           // Handle connection errors
-          onEvent('connect_error', (err) => {
+          onEvent("connect_error", (err) => {
             console.error("Socket connection error:", err.message);
-            dispatch(setSocketConnected({
-              connected: false,
-              socketId: null
-            }));
+            dispatch(
+              setSocketConnected({
+                connected: false,
+                socketId: null,
+              })
+            );
           });
-          
+
           // Listening for all events
-          onEvent('getOnlineUsers', (onlineUsers) => {
-            console.log('Online users updated:', onlineUsers.length);
+          onEvent("getOnlineUsers", (onlineUsers) => {
+            console.log("Online users updated:", onlineUsers.length);
             dispatch(setOnlineUsers(onlineUsers));
           });
 
           // Handle all notification types with the same function
           const handleNotification = (notification) => {
-            console.log('Received notification:', notification);
+            console.log("Received notification:", notification);
             dispatch(addNotification(notification));
           };
-          
+
           // Register notification handlers
-          onEvent('notification', handleNotification);
-          onEvent('newNotification', handleNotification);
+          onEvent("notification", handleNotification);
+          onEvent("newNotification", handleNotification);
 
           // Register order status update handler
-          onEvent('order_status_update', (data) => {
-            console.log('Order status update received:', data);
-            
+          onEvent("order_status_update", (data) => {
+            console.log("Order status update received:", data);
+
             // Make sure data has the required fields
             if (!data || !data.orderId) {
-              console.error('Invalid order status update received:', data);
+              console.error("Invalid order status update received:", data);
               return;
             }
-            
+
             // Add timestamp if not present
             const orderUpdate = {
               ...data,
-              timestamp: data.timestamp || new Date().toISOString()
+              timestamp: data.timestamp || new Date().toISOString(),
             };
-            
+
             // Add to order status updates in socket slice
             dispatch(addOrderStatusUpdate(orderUpdate));
-            
+
             // Synchronize order status in user's order history
             if (orderUpdate.orderId && orderUpdate.status) {
-              console.log('Dispatching syncOrderStatus with:', orderUpdate);
-              
-              dispatch(syncOrderStatus({
-                orderId: orderUpdate.orderId,
-                status: orderUpdate.status,
-                paymentStatus: orderUpdate.paymentStatus
-              }));
-              
+              console.log("Dispatching syncOrderStatus with:", orderUpdate);
+
+              dispatch(
+                syncOrderStatus({
+                  orderId: orderUpdate.orderId,
+                  status: orderUpdate.status,
+                  paymentStatus: orderUpdate.paymentStatus,
+                })
+              );
+
               // Show notification for order updates with better formatting
-              const formattedStatus = orderUpdate.status.replace(/_/g, ' ').toUpperCase();
+              const formattedStatus = orderUpdate.status
+                .replace(/_/g, " ")
+                .toUpperCase();
               const orderId = orderUpdate.orderId.substring(0, 8);
-              
+
               toast.info(
                 `Order #${orderId}... status updated to ${formattedStatus}`,
                 {
                   position: "bottom-right",
-                  autoClose: 5000
+                  autoClose: 5000,
                 }
               );
             }
@@ -352,14 +379,14 @@ const App = () => {
 
         return () => {
           // Clean up all event listeners
-          offEvent('connect');
-          offEvent('disconnect');
-          offEvent('connect_error');
-          offEvent('getOnlineUsers');
-          offEvent('notification');
-          offEvent('newNotification');
-          offEvent('order_status_update');
-          
+          offEvent("connect");
+          offEvent("disconnect");
+          offEvent("connect_error");
+          offEvent("getOnlineUsers");
+          offEvent("notification");
+          offEvent("newNotification");
+          offEvent("order_status_update");
+
           closeSocket();
           dispatch(resetSocketState());
           dispatch(setOnlineUsers([]));
@@ -373,7 +400,7 @@ const App = () => {
       dispatch(setOnlineUsers([]));
     }
   }, [user, dispatch]);
-  
+
   return (
     <StoryProtocolProvider>
       <SolanaWalletProvider>

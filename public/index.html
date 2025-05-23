@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Social Food Delivery System</title>
+    <meta name="title" content="Social Food Delivery System">
+    <meta name="description" content="Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://foodapp.com/">
+    <meta property="og:title" content="Social Food Delivery System">
+    <meta property="og:description" content="Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!">
+    <meta property="og:image" content="/og-image.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://foodapp.com/">
+    <meta property="twitter:title" content="Social Food Delivery System">
+    <meta property="twitter:description" content="Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!">
+    <meta property="twitter:image" content="/og-image.jpg">
+    
+    <!-- Dynamic meta tags will be injected by the app -->
+    <meta id="meta-title" property="og:title" content="Social Food Delivery System">
+    <meta id="meta-description" property="og:description" content="Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!">
+    <meta id="meta-image" property="og:image" content="/og-image.jpg">
+    <meta id="meta-url" property="og:url" content="https://foodapp.com/">
+    
+    <script>
+      // Dynamic meta tag updater
+      window.updateMetaTags = function(title, description, image, url) {
+        // Update Open Graph tags
+        document.getElementById('meta-title').setAttribute('content', title || 'Social Food Delivery System');
+        document.getElementById('meta-description').setAttribute('content', description || 'Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!');
+        document.getElementById('meta-image').setAttribute('content', image || '/og-image.jpg');
+        document.getElementById('meta-url').setAttribute('content', url || window.location.href);
+        
+        // Update Twitter tags
+        document.querySelector('meta[property="twitter:title"]').setAttribute('content', title || 'Social Food Delivery System');
+        document.querySelector('meta[property="twitter:description"]').setAttribute('content', description || 'Discover and share delicious food from local vendors. Order, rate and connect with food lovers in your area!');
+        document.querySelector('meta[property="twitter:image"]').setAttribute('content', image || '/og-image.jpg');
+        document.querySelector('meta[property="twitter:url"]').setAttribute('content', url || window.location.href);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html> 

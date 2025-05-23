@@ -1,0 +1,262 @@
+/* Favorites page specific styling */
+
+/* Animated bookmark icon */
+.bookmark-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Spinning animation for refresh button */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Card hover effects */
+.favorite-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.favorite-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar for favorites */
+.favorites-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.favorites-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.favorites-container::-webkit-scrollbar-thumb {
+  background: #ff9800;
+  border-radius: 10px;
+}
+
+.favorites-container::-webkit-scrollbar-thumb:hover {
+  background: #e88c00;
+}
+
+/* Grid layout animations */
+.grid-item-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.grid-item-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.grid-item-exit {
+  opacity: 1;
+}
+
+.grid-item-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Empty state styling */
+.empty-favorites {
+  background: linear-gradient(to bottom right, #fff5e6, #fff);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.empty-favorites svg {
+  color: #ff9800;
+  opacity: 0.5;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Category tags */
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #fff8e1;
+  color: #ff9800;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.category-tag:hover {
+  background-color: #ffe0b2;
+  transform: scale(1.05);
+}
+
+/* Stats card */
+.stats-card {
+  background: linear-gradient(135deg, #fff3e0, #fff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.stats-title {
+  color: #e65100;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.stats-title svg {
+  margin-right: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff9800;
+  transition: color 0.3s;
+}
+
+.stat-value:hover {
+  color: #e65100;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #757575;
+  margin-top: 0.25rem;
+}
+
+/* Search bar styling */
+.search-input {
+  transition: all 0.3s ease;
+  width: 200px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-input:focus {
+  width: 250px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab indicator */
+.custom-tab-indicator {
+  background-color: #ff9800 !important;
+  height: 3px !important;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .search-input,
+  .search-input:focus {
+    width: 100%;
+  }
+  
+  .empty-favorites {
+    padding: 2rem 1rem;
+  }
+  
+  .stats-card {
+    padding: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+}
+
+/* Fade in animation for content */
+.favorites-container {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Better rating stars */
+.text-yellow-500 {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Image hover effect */
+.favorite-card img {
+  transition: filter 0.3s ease;
+}
+
+.favorite-card:hover img {
+  filter: brightness(1.05);
+}
+
+/* Menu item hover effects */
+.MuiMenuItem-root:hover {
+  background-color: #fff3e0 !important;
+}
+
+.MuiMenuItem-root.Mui-selected {
+  background-color: #ffe0b2 !important;
+}
+
+/* Button effects */
+.MuiButton-contained {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.MuiButton-contained:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+} 

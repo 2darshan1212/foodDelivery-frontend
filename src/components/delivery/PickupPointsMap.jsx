@@ -1,0 +1,472 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { MdMyLocation, MdRestaurant, MdDeliveryDining, MdHome, MdDirections, MdTimer, MdRefresh } from 'react-icons/md';
+import { renderToString } from 'react-dom/server';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchConfirmedOrders, refreshConfirmedOrders } from '../../redux/deliverySlice';
+
+// Fix leaflet icon issues
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Need to explicitly set the default icon for Leaflet
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// PickupPointsMap component for showing pickup points on delivery dashboard
+const PickupPointsMap = ({ 
+  height = "400px",
+  onAcceptOrder
+}) => {
+  const dispatch = useDispatch();
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const markersRef = useRef([]);
+  const routesRef = useRef([]);
+  
+  const { 
+    currentLocation, 
+    pickupPoints, 
+    distances, 
+    estimatedTravelTimes, 
+    pickupToDeliveryDistances,
+    lastConfirmedOrdersUpdate,
+    isLoadingConfirmedOrders 
+  } = useSelector(state => state.delivery);
+  const [mapInitialized, setMapInitialized] = useState(false);
+  const [showDeliveryLocations, setShowDeliveryLocations] = useState(true);
+  const [showRoutes, setShowRoutes] = useState(true);
+  
+  // Function to refresh confirmed orders
+  const handleRefreshOrders = useCallback(() => {
+    dispatch(fetchConfirmedOrders());
+  }, [dispatch]);
+  
+  // Format minutes to a readable time string
+  const formatTime = useCallback((minutes) => {
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}m`;
+  }, []);
+  
+  // Helper function to create custom icons
+  const createCustomIcon = useCallback((type, options = {}) => {
+    let html;
+    let className;
+    
+    switch(type) {
+      case 'agent':
+        html = renderToString(
+          <div className="flex items-center justify-center text-blue-600">
+            <MdDeliveryDining size={24} />
+          </div>
+        );
+        className = 'custom-marker-icon agent-marker';
+        break;
+      case 'pickup':
+        html = renderToString(
+          <div className="flex items-center justify-center text-green-600">
+            <MdRestaurant size={22} />
+          </div>
+        );
+        className = 'custom-marker-icon pickup-marker';
+        break;
+      case 'delivery':
+        html = renderToString(
+          <div className="flex items-center justify-center text-purple-600">
+            <MdHome size={22} />
+          </div>
+        );
+        className = 'custom-marker-icon delivery-marker';
+        break;
+      default:
+        html = renderToString(
+          <div className="flex items-center justify-center text-gray-600">
+            <MdMyLocation size={22} />
+          </div>
+        );
+        className = 'custom-marker-icon default-marker';
+    }
+    
+    return L.divIcon({
+      className,
+      html,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+  }, []);
+  
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+    
+    try {
+      // Create map
+      mapRef.current = L.map(mapContainerRef.current, {
+        center: [
+          currentLocation.latitude || 0,
+          currentLocation.longitude || 0
+        ],
+        zoom: 13,
+        zoomControl: true,
+        attributionControl: false
+      });
+      
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(mapRef.current);
+      
+      setMapInitialized(true);
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markersRef.current = [];
+      }
+    };
+  }, []);
+  
+  // Update map when locations change
+  useEffect(() => {
+    if (!mapRef.current || !mapInitialized) return;
+    
+    // Clear existing markers
+    markersRef.current.forEach(marker => {
+      if (mapRef.current) {
+        mapRef.current.removeLayer(marker);
+      }
+    });
+    markersRef.current = [];
+    
+    // Agent marker
+    if (currentLocation.latitude && currentLocation.longitude) {
+      const agentMarker = L.marker(
+        [currentLocation.latitude, currentLocation.longitude],
+        { icon: createCustomIcon('agent') }
+      ).addTo(mapRef.current);
+      
+      agentMarker.bindTooltip('Your location', {
+        permanent: false,
+        direction: 'top'
+      });
+      
+      markersRef.current.push(agentMarker);
+      
+      // Center map on agent location
+      mapRef.current.setView(
+        [currentLocation.latitude, currentLocation.longitude],
+        mapRef.current.getZoom()
+      );
+      
+      // Add 2km radius circle
+      const radiusCircle = L.circle(
+        [currentLocation.latitude, currentLocation.longitude],
+        {
+          color: 'rgba(59, 130, 246, 0.5)',
+          fillColor: 'rgba(59, 130, 246, 0.1)',
+          fillOpacity: 0.3,
+          radius: 2000 // 2km
+        }
+      ).addTo(mapRef.current);
+      
+      markersRef.current.push(radiusCircle);
+    }
+        // Add pickup point markers
+      if (pickupPoints && pickupPoints.length > 0) {
+        pickupPoints.forEach(point => {
+          if (point.latitude && point.longitude) {
+            // Add pickup point marker
+            const marker = L.marker(
+              [point.latitude, point.longitude],
+              { icon: createCustomIcon('pickup') }
+            ).addTo(mapRef.current);
+            
+            // Get distance and estimated time information
+            const distance = distances[point.orderId] ? 
+              `${distances[point.orderId].toFixed(2)} km away` : 
+              'Distance unknown';
+              
+            const travelTime = estimatedTravelTimes[point.orderId] ? 
+              formatTime(estimatedTravelTimes[point.orderId]) : 
+              'Time unknown';
+              
+            const pickupToDeliveryDistance = pickupToDeliveryDistances[point.orderId] ? 
+              `${pickupToDeliveryDistances[point.orderId].toFixed(2)} km` : 
+              'Distance unknown';
+              
+            // Create enhanced popup content with more details
+            const popupContent = `
+              <div class="pickup-popup p-2">
+                <h3 class="text-sm font-bold mb-1">${point.restaurantName}</h3>
+                <p class="text-xs text-gray-600">Order #${point.orderId.slice(-6)}</p>
+                <p class="text-xs">${point.items} items • $${point.orderAmount?.toFixed(2) || '0.00'}</p>
+                <div class="flex items-center mt-1">
+                  <span class="inline-flex items-center text-xs text-blue-600 mr-2">
+                    <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                    </svg>
+                    ${distance}
+                  </span>
+                  <span class="inline-flex items-center text-xs text-green-600">
+                    <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    ${travelTime}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between mt-2">
+                  <div class="text-xs text-gray-600">${point.customerName}</div>
+                  <div class="text-xs font-medium ${point.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'}">${point.status}</div>
+                </div>
+                <button 
+                  class="mt-3 w-full px-3 py-1.5 bg-green-500 text-white text-xs rounded hover:bg-green-600 accept-order-btn" 
+                  data-order-id="${point.orderId}"
+                >
+                  Accept Order
+                </button>
+              </div>
+            `;
+            
+            const popup = L.popup({
+              closeButton: true,
+              className: 'pickup-point-popup',
+              maxWidth: 220
+            }).setContent(popupContent);
+            
+            marker.bindPopup(popup);
+            marker.bindTooltip(`${point.restaurantName} (${travelTime})`, {
+              permanent: false,
+              direction: 'top'
+            });
+            
+            // Handle accept order button click
+            marker.on('popupopen', () => {
+              setTimeout(() => {
+                const btn = document.querySelector(`.accept-order-btn[data-order-id="${point.orderId}"]`);
+                if (btn) {
+                  btn.addEventListener('click', () => {
+                    if (onAcceptOrder) {
+                      onAcceptOrder(point.orderId);
+                      marker.closePopup();
+                    }
+                  });
+                }
+              }, 100);
+            });
+            
+            markersRef.current.push(marker);
+            
+            // Add delivery location marker if coordinates are available and showDeliveryLocations is enabled
+            if (showDeliveryLocations && point.deliveryLatitude && point.deliveryLongitude) {
+              const deliveryMarker = L.marker(
+                [point.deliveryLatitude, point.deliveryLongitude],
+                { icon: createCustomIcon('delivery') }
+              ).addTo(mapRef.current);
+              
+              // Create delivery location popup
+              const deliveryPopupContent = `
+                <div class="delivery-popup p-2">
+                  <h3 class="text-sm font-bold mb-1">Delivery Location</h3>
+                  <p class="text-xs text-gray-600">Order #${point.orderId.slice(-6)}</p>
+                  <p class="text-xs text-gray-600">${point.deliveryAddress}</p>
+                  <p class="text-xs mt-1">Customer: ${point.customerName}</p>
+                  <div class="flex items-center mt-1">
+                    <span class="inline-flex items-center text-xs text-purple-600">
+                      <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                      </svg>
+                      ${pickupToDeliveryDistance} from restaurant
+                    </span>
+                  </div>
+                </div>
+              `;
+              
+              const deliveryPopup = L.popup({
+                closeButton: true,
+                className: 'delivery-point-popup',
+                maxWidth: 220
+              }).setContent(deliveryPopupContent);
+              
+              deliveryMarker.bindPopup(deliveryPopup);
+              deliveryMarker.bindTooltip(`Delivery for #${point.orderId.slice(-6)}`, {
+                permanent: false,
+                direction: 'top'
+              });
+              
+              markersRef.current.push(deliveryMarker);
+              
+              // Add a route line between pickup and delivery if showRoutes is enabled
+              if (showRoutes) {
+                const routeLine = L.polyline(
+                  [
+                    [point.latitude, point.longitude],
+                    [point.deliveryLatitude, point.deliveryLongitude]
+                  ],
+                  {
+                    color: '#6366F1', // Indigo color
+                    weight: 3,
+                    opacity: 0.6,
+                    dashArray: '5, 5',
+                    lineCap: 'round'
+                  }
+                ).addTo(mapRef.current);
+                
+                // Add route information tooltip
+                routeLine.bindTooltip(
+                  `${pickupToDeliveryDistance} • ~${Math.round((pickupToDeliveryDistances[point.orderId] / 30) * 60)} min`,
+                  { permanent: false }
+                );
+                
+                routesRef.current.push(routeLine);
+              }
+            }
+          }
+        });
+      
+      // Fit bounds to show all markers if we have both agent location and pickup points
+      if (currentLocation.latitude && currentLocation.longitude && pickupPoints.length > 0) {
+        const bounds = [];
+        bounds.push([currentLocation.latitude, currentLocation.longitude]);
+        
+        pickupPoints.forEach(point => {
+          if (point.latitude && point.longitude) {
+            bounds.push([point.latitude, point.longitude]);
+          }
+        });
+        
+        if (bounds.length > 1) {
+          mapRef.current.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 15
+          });
+        }
+      }
+    }
+  }, [currentLocation, pickupPoints, distances, mapInitialized, createCustomIcon, onAcceptOrder]);
+  
+  // Cleanup routes when component unmounts or dependencies change
+  const cleanupRoutes = useCallback(() => {
+    if (mapRef.current) {
+      routesRef.current.forEach(route => {
+        if (mapRef.current) mapRef.current.removeLayer(route);
+      });
+      routesRef.current = [];
+    }
+  }, []);
+
+  // Add toggle controls for the map
+  useEffect(() => {
+    if (!mapRef.current || !mapInitialized) return;
+    
+    // Create custom controls for toggling delivery locations and routes
+    const deliveryControlDiv = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+    deliveryControlDiv.style.backgroundColor = 'white';
+    deliveryControlDiv.style.padding = '5px';
+    deliveryControlDiv.style.cursor = 'pointer';
+    deliveryControlDiv.innerHTML = showDeliveryLocations ? 
+      renderToString(<MdHome size={20} className="text-purple-600" />) : 
+      renderToString(<MdHome size={20} className="text-gray-400" />);
+    deliveryControlDiv.title = showDeliveryLocations ? 'Hide delivery locations' : 'Show delivery locations';
+    deliveryControlDiv.onclick = (e) => {
+      L.DomEvent.stopPropagation(e);
+      setShowDeliveryLocations(!showDeliveryLocations);
+    };
+    
+    const routeControlDiv = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+    routeControlDiv.style.backgroundColor = 'white';
+    routeControlDiv.style.padding = '5px';
+    routeControlDiv.style.cursor = 'pointer';
+    routeControlDiv.innerHTML = showRoutes ? 
+      renderToString(<MdDirections size={20} className="text-indigo-600" />) : 
+      renderToString(<MdDirections size={20} className="text-gray-400" />);
+    routeControlDiv.title = showRoutes ? 'Hide routes' : 'Show routes';
+    routeControlDiv.onclick = (e) => {
+      L.DomEvent.stopPropagation(e);
+      setShowRoutes(!showRoutes);
+    };
+    
+    const refreshControlDiv = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
+    refreshControlDiv.style.backgroundColor = 'white';
+    refreshControlDiv.style.padding = '5px';
+    refreshControlDiv.style.cursor = 'pointer';
+    refreshControlDiv.innerHTML = renderToString(
+      isLoadingConfirmedOrders ? 
+      <div className="animate-spin"><MdTimer size={20} className="text-blue-600" /></div> : 
+      <MdRefresh size={20} className="text-blue-600" />
+    );
+    refreshControlDiv.title = 'Refresh orders';
+    refreshControlDiv.onclick = (e) => {
+      L.DomEvent.stopPropagation(e);
+      handleRefreshOrders();
+    };
+    
+    // Create custom control instances
+    const deliveryControl = L.control({ position: 'topright' });
+    deliveryControl.onAdd = () => deliveryControlDiv;
+    
+    const routeControl = L.control({ position: 'topright' });
+    routeControl.onAdd = () => routeControlDiv;
+    
+    const refreshControl = L.control({ position: 'topright' });
+    refreshControl.onAdd = () => refreshControlDiv;
+    
+    // Add controls to map
+    deliveryControl.addTo(mapRef.current);
+    routeControl.addTo(mapRef.current);
+    refreshControl.addTo(mapRef.current);
+    
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.removeControl(deliveryControl);
+        mapRef.current.removeControl(routeControl);
+        mapRef.current.removeControl(refreshControl);
+      }
+    };
+  }, [mapInitialized, showDeliveryLocations, showRoutes, isLoadingConfirmedOrders, handleRefreshOrders]);
+  
+  return (
+    <div className="pickup-points-map relative" style={{ height, width: '100%' }}>
+      {(!currentLocation.latitude || !currentLocation.longitude) && (
+        <div className="flex items-center justify-center h-full bg-gray-100 text-gray-600">
+          <div className="text-center">
+            <MdMyLocation size={32} className="mx-auto mb-2 text-gray-400" />
+            <p>Waiting for location data...</p>
+          </div>
+        </div>
+      )}
+      <div 
+        ref={mapContainerRef} 
+        className="h-full w-full rounded-lg overflow-hidden"
+        style={{ display: (!currentLocation.latitude || !currentLocation.longitude) ? 'none' : 'block' }}
+      ></div>
+      
+      {/* Info overlay */}
+      {mapInitialized && pickupPoints && pickupPoints.length > 0 && (
+        <div className="absolute bottom-2 left-2 bg-white bg-opacity-90 p-2 rounded-md shadow-sm text-xs z-[1000]">
+          <div className="font-medium text-gray-700 mb-1">{pickupPoints.length} confirmed orders</div>
+          <div className="text-gray-600">
+            Last updated: {lastConfirmedOrdersUpdate ? new Date(lastConfirmedOrdersUpdate).toLocaleTimeString() : 'Never'}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PickupPointsMap;

@@ -558,18 +558,38 @@ const Header = () => {
 
   const logoutHandler = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/v1/user/logout`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        dispatch(setAuthUser(null));
-        dispatch(setSelectedPost(null));
-        dispatch(setPosts([]));
-        navigate("/login");
-        toast.success(res.data.message);
-      }
+      // Import the clearAuthToken function from axiosInstance
+      const { clearAuthToken } = await import('../../utils/axiosInstance');
+      
+      // Clear token from localStorage and axios headers
+      clearAuthToken();
+      
+      // Call the logout API endpoint (no need for withCredentials)
+      const res = await axios.get(`${API_BASE_URL}/api/v1/user/logout`);
+      
+      // Update Redux state regardless of API response
+      dispatch(setAuthUser(null));
+      dispatch(setSelectedPost(null));
+      dispatch(setPosts([]));
+      
+      // Show success message and redirect
+      toast.success(res.data?.message || "Logged out successfully");
+      navigate("/login");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed");
+      console.error('Logout error:', error);
+      
+      // Even if the API call fails, we should still clear local state
+      localStorage.removeItem('authToken');
+      delete axios.defaults.headers.common['Authorization'];
+      
+      // Update Redux state to ensure user is logged out locally
+      dispatch(setAuthUser(null));
+      dispatch(setSelectedPost(null));
+      dispatch(setPosts([]));
+      
+      // Show error message but still redirect
+      toast.error(error.response?.data?.message || "Server error during logout");
+      navigate("/login");
     }
   };
 

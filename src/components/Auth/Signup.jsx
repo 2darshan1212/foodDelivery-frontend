@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { Button, Input } from "@mui/material";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Button, TextField, CircularProgress } from "@mui/material";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -21,6 +20,9 @@ const Signup = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      console.log('Attempting signup with:', { username: input.username, email: input.email });
+      
+      // Use direct URL and don't use withCredentials to avoid CORS issues
       const res = await axios.post(
         "https://food-delivery-backend-gray.vercel.app/api/v1/user/register",
         input,
@@ -28,13 +30,32 @@ const Signup = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          withCredentials: true,
+          withCredentials: false, // Don't use credentials for cross-origin request
         }
       );
-      console.log(res.data);
+      
+      console.log('Signup response:', res.data);
+      
       if (res.data.success) {
-        navigate("/login");
-        toast.success(res.data.message);
+        // If backend returns a token and user object (auto-login after signup)
+        if (res.data.token && res.data.user) {
+          // Store token in localStorage
+          localStorage.setItem('authToken', res.data.token);
+          
+          // Set for all future axios requests globally
+          axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+          
+          toast.success('Account created successfully! Logging you in...');
+          
+          // Redirect to homepage instead of login page
+          navigate("/");
+        } else {
+          // If no token provided, redirect to login page
+          toast.success(res.data.message);
+          navigate("/login");
+        }
+        
+        // Clear form
         setInput({
           username: "",
           email: "",
@@ -42,8 +63,9 @@ const Signup = () => {
         });
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message);
+      console.error('Signup error:', error);
+      const errorMessage = error.response?.data?.message || 'Error creating account';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -60,50 +82,60 @@ const Signup = () => {
           <p className="text-sm text-center">signup to see photos </p>
         </div>
         <div>
-          <div className="text-blue-700">UserName</div>
-          <Input
+          <TextField
+            label="Username"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             type="text"
             name="username"
             value={input.username}
             onChange={changeEventHandler}
-            className="focus-visible:ring-transparent mx-2 "
+            required
           />
         </div>
         <div>
-          <div className="text-blue-700">Email</div>
-          <Input
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             type="email"
             name="email"
             value={input.email}
             onChange={changeEventHandler}
-            className="focus-visible:ring-transparent mx-2"
+            required
           />
         </div>
         <div>
-          <div className="text-blue-700">Password</div>
-          <Input
+          <TextField
+            label="Password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             type="password"
             name="password"
             value={input.password}
             onChange={changeEventHandler}
-            className="focus-visible:ring-transparent mx-2"
+            required
           />
         </div>
-        <>
-          {loading ? (
-            <Button>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            </Button>
-          ) : (
-            <Button type="submit">SignUp</Button>
-          )}
-          <div className="text-center">
-            Already have an account?{" "}
-            <Link to="/login" className="text-blue-600">
-              Login
-            </Link>
-          </div>
-        </>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          color="primary" 
+          fullWidth 
+          disabled={loading}
+          sx={{ mt: 2, mb: 2 }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
+        </Button>
+        <div className="text-center">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600">
+            Login
+          </Link>
+        </div>
       </form>
     </div>
   );
